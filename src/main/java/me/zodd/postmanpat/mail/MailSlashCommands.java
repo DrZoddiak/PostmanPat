@@ -1,15 +1,7 @@
 package me.zodd.postmanpat.mail;
 
-import com.earth2me.essentials.IEssentials;
 import com.earth2me.essentials.User;
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.api.commands.PluginSlashCommand;
-import github.scarsz.discordsrv.api.commands.SlashCommand;
-import github.scarsz.discordsrv.api.commands.SlashCommandProvider;
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent;
-import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionType;
-import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData;
-import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData;
 import me.zodd.postmanpat.EssxData;
 import me.zodd.postmanpat.PostmanPat;
 import me.zodd.postmanpat.PostmanPatConfig;
@@ -23,6 +15,7 @@ public class MailSlashCommands extends EssxData {
 
     public MailSlashCommands(PostmanPat plugin) {
         super(plugin);
+        this.plugin = plugin;
     }
 
     public void markAsReadCommand(SlashCommandEvent event) {
@@ -35,7 +28,7 @@ public class MailSlashCommands extends EssxData {
         var user = getEssxUser(event.getUser().getId());
         var mailMessage = user.getMailMessages();
 
-        var includeRead = event.getOption("include-read");
+        var includeRead = event.getOption(PostmanPatConfig.includeReadArg);
         var includeBool = includeRead != null && includeRead.getAsBoolean();
 
         if (!includeBool && user.getUnreadMailAmount() <= 0) {
@@ -107,6 +100,4 @@ public class MailSlashCommands extends EssxData {
                 ).collect(Collectors.toCollection(ArrayList::new));
         user.setMailList(readMail);
     }
-
-
 }

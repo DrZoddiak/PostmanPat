@@ -1,6 +1,5 @@
 package me.zodd.postmanpat.mail;
 
-
 import me.zodd.postmanpat.PostmanPatConfig;
 import net.essentialsx.api.v2.services.mail.MailMessage;
 

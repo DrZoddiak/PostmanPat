@@ -10,24 +10,19 @@ import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCom
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionType;
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData;
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData;
-import github.scarsz.discordsrv.objects.managers.AccountLinkManager;
 import github.scarsz.discordsrv.util.DiscordUtil;
 import me.zodd.postmanpat.econ.EconSlashCommands;
-import me.zodd.postmanpat.mail.DiscordMailManager;
 import me.zodd.postmanpat.mail.MailListeners;
 import me.zodd.postmanpat.mail.MailSlashCommands;
 import net.essentialsx.api.v2.events.UserMailEvent;
-import net.essentialsx.api.v2.services.mail.MailMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import redempt.redlib.config.ConfigManager;
 
-import java.time.Instant;
 import java.util.*;
 
 public final class PostmanPat extends JavaPlugin implements SlashCommandProvider {
