@@ -11,9 +11,6 @@ public class PostmanPatConfig {
     @Comment("The discord Channel ID to ping users if DMs are disabled")
     public static Long NotifyChannel = 0L;
 
-    @Comment("root command for mail")
-    public static String rootCommand = "mail";
-
     @Comment("Subcommand for reading mail")
     public static String readSubCommand = "read";
 
@@ -32,4 +29,10 @@ public class PostmanPatConfig {
             @Comment("It is suggested you do not raise this value above 1900, lest ye risk errors")
     })
     public static int maxMessageSize = 1900;
+
+    @Comment("Will appear at the footer of embeds")
+    public static String serverBranding = "Powered by PostmanPat";
+
+    @Comment("Whenever this plugin displays a currency symbol this is what it will use")
+    public static String currencySymbol = "$";
 }

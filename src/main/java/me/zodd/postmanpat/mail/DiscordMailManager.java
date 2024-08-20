@@ -57,7 +57,7 @@ public class DiscordMailManager {
     public StringBuilder formatMailMessage(StringBuilder builder, MailMessage mail) {
         return builder.append("\nSent: ").append(Instant.ofEpochMilli(mail.getTimeSent()))
                 .append("\nSender: ").append(mail.getSenderUsername())
-                .append("\nMessage: ").append(mail.getMessage())
+                .append("\nMessage: ").append(mail.getMessage().replaceAll("§\\w",""))
                 .append("\n");
     }
 

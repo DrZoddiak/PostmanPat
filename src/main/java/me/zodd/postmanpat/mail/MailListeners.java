@@ -1,15 +1,17 @@
 package me.zodd.postmanpat.mail;
 
+import me.zodd.postmanpat.EssxData;
 import me.zodd.postmanpat.PostmanPat;
 import me.zodd.postmanpat.PostmanPatConfig;
 import net.essentialsx.api.v2.events.UserMailEvent;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 
-public class MailListeners {
+public class MailListeners extends EssxData {
     PostmanPat plugin;
 
     public MailListeners(PostmanPat plugin) {
+        super(plugin);
         this.plugin = plugin;
     }
 
@@ -20,7 +22,7 @@ public class MailListeners {
             return;
         }
 
-        if (plugin.mgr() == null) {
+        if (mgr() == null) {
             plugin.getLogger().warning("Account link manager unavailable");
             return;
         }
@@ -28,7 +30,7 @@ public class MailListeners {
         var msg = event.getMessage();
         var mailManager = new DiscordMailManager(msg);
         var p = event.getRecipient();
-        var discordID = plugin.mgr().getDiscordId(p.getUUID());
+        var discordID = mgr().getDiscordId(p.getUUID());
         if (discordID == null) {
             plugin.getLogger().warning("Failed to retrieve discord ID, account may not be linked.");
             return;

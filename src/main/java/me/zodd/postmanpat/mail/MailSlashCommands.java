@@ -3,22 +3,26 @@ package me.zodd.postmanpat.mail;
 import com.earth2me.essentials.IEssentials;
 import com.earth2me.essentials.User;
 import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.api.commands.PluginSlashCommand;
+import github.scarsz.discordsrv.api.commands.SlashCommand;
+import github.scarsz.discordsrv.api.commands.SlashCommandProvider;
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent;
-import github.scarsz.discordsrv.objects.managers.AccountLinkManager;
+import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionType;
+import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData;
+import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData;
+import me.zodd.postmanpat.EssxData;
+import me.zodd.postmanpat.PostmanPat;
+import me.zodd.postmanpat.PostmanPatConfig;
 import net.essentialsx.api.v2.services.mail.MailMessage;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class MailSlashCommands {
+public class MailSlashCommands extends EssxData {
+    PostmanPat plugin;
 
-    IEssentials ess;
-    DiscordSRV srv;
-
-    public MailSlashCommands(IEssentials ess, DiscordSRV srv) {
-        this.ess = ess;
-        this.srv = srv;
+    public MailSlashCommands(PostmanPat plugin) {
+        super(plugin);
     }
 
     public void markAsReadCommand(SlashCommandEvent event) {
@@ -70,8 +74,8 @@ public class MailSlashCommands {
             return;
         }
 
-        var essxUser = ess.getUser(uuid);
-        var senderEssxUser = ess.getUser(senderUUID);
+        var essxUser = plugin.getEss().getUser(uuid);
+        var senderEssxUser = plugin.getEss().getUser(senderUUID);
 
         var message = Objects.requireNonNull(event.getOption("message")).getAsString();
 
@@ -79,14 +83,6 @@ public class MailSlashCommands {
 
         event.reply("Sent mail to " + user.getAsTag())
                 .setEphemeral(true).queue();
-    }
-
-    /**
-     * @param id A discord user ID
-     * @return An Essentials User
-     */
-    private User getEssxUser(String id) {
-        return ess.getUser(mgr().getUuid(id));
     }
 
     /**
@@ -112,8 +108,5 @@ public class MailSlashCommands {
         user.setMailList(readMail);
     }
 
-    AccountLinkManager mgr() {
-        return srv.getAccountLinkManager();
-    }
 
 }

@@ -29,6 +29,11 @@ repositories {
         name = "redlib"
         url = "https://redempt.dev"
     }
+    maven {
+        // VaultAPI
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
 }
 
 dependencies {
@@ -36,6 +41,7 @@ dependencies {
     compileOnly 'com.discordsrv:discordsrv:1.28.1'
     compileOnly 'net.dv8tion:JDA:5.0.2'
     compileOnly 'net.essentialsx:EssentialsX:2.20.1'
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     implementation 'com.github.Redempt:RedLib:6.6.1'
 }
 
