@@ -23,6 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import redempt.redlib.config.ConfigManager;
 import redempt.redlib.config.annotations.Comment;
 import redempt.redlib.config.annotations.ConfigMappable;
+import redempt.redlib.config.annotations.ConfigPath;
 
 import java.time.Instant;
 import java.util.*;
@@ -97,15 +98,15 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
     @Override
     public Set<PluginSlashCommand> getSlashCommands() {
         return new HashSet<>(List.of(
-                new PluginSlashCommand(this, new CommandData("mail", "mail thing")
+                new PluginSlashCommand(this, new CommandData(PostmanPatConfig.rootCommand, "mail command")
                         .addSubcommands(
-                                new SubcommandData("read", "read mail")
+                                new SubcommandData(PostmanPatConfig.readSubCommand, "read mail")
                                         .addOption(OptionType.INTEGER, "page", "page number to view", false)
-                                        .addOption(OptionType.BOOLEAN, "include-read", "include all mail including already read"),
-                                new SubcommandData("send", "send mail")
+                                        .addOption(OptionType.BOOLEAN, PostmanPatConfig.includeReadArg, "include all mail including already read"),
+                                new SubcommandData(PostmanPatConfig.sendSubCommand, "send mail")
                                         .addOption(OptionType.USER, "user", "user to send mail to.", true)
                                         .addOption(OptionType.STRING, "message", "message to send to the user", true),
-                                new SubcommandData("mark-mail-as-read", "Marks all mail as having been read.")
+                                new SubcommandData(PostmanPatConfig.markReadSubCommand, "Marks all mail as having been read.")
                         )
                 )
         ));
@@ -186,14 +187,26 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
 
     }
 
-    @SlashCommand(path = "mail/mark-mail-as-read")
+    @SlashCommand(path = "mail/*")
+    public void processSlashCommand(SlashCommandEvent event) {
+        var sub = event.getSubcommandName();
+
+        if (sub.contentEquals(PostmanPatConfig.readSubCommand)) {
+            mailReadCommand(event);
+        } else if (sub.contentEquals(PostmanPatConfig.sendSubCommand)) {
+            mailSendCommand(event);
+        } else if (sub.contentEquals(PostmanPatConfig.markReadSubCommand)) {
+            markAsReadCommand(event);
+        }
+
+    }
+
     public void markAsReadCommand(SlashCommandEvent event) {
         var user = getEssxUser(event.getUser().getId());
         markMailAsRead(user, user.getMailMessages());
         event.reply("Mail has been marked as read!").setEphemeral(true).queue();
     }
 
-    @SlashCommand(path = "mail/read")
     public void mailReadCommand(SlashCommandEvent event) {
         var user = getEssxUser(event.getUser().getId());
         var mailMessage = user.getMailMessages();
@@ -225,7 +238,6 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
 
     }
 
-    @SlashCommand(path = "mail/send")
     public void mailSendCommand(SlashCommandEvent event) {
         var user = Objects.requireNonNull(event.getOption("user")).getAsUser();
         var senderUser = event.getUser();
@@ -257,6 +269,21 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
 
         @Comment("The discord Channel ID to ping users if DMs are disabled")
         public static Long NotifyChannel = 0L;
+
+        @Comment("root command for mail")
+        public static String rootCommand = "mail";
+
+        @Comment("Subcommand for reading mail")
+        public static String readSubCommand = "read";
+
+        @Comment("Subcommand for sending mail to another user")
+        public static String sendSubCommand = "send";
+
+        @Comment("Subcommand for marking all unread mail as read")
+        public static String markReadSubCommand = "mark-read";
+
+        @Comment("Argument for including mail that is already read")
+        public static String includeReadArg = "include-read";
 
     }
 
