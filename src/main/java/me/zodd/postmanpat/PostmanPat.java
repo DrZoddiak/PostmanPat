@@ -201,8 +201,6 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
         var includeRead = event.getOption("include-read");
         var includeBool = includeRead != null && includeRead.getAsBoolean();
 
-        getLogger().info("IncludeReadMessage? " + includeBool);
-
         if (!includeBool && user.getUnreadMailAmount() <= 0) {
             event.reply("No new mail!").setEphemeral(true).queue();
             return;
