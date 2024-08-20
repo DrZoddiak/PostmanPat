@@ -1,0 +1,5 @@
+name: PostmanPat
+version: '${version}'
+main: me.zodd.postmanpat.PostmanPat
+api-version: '1.21'
+depend : [DiscordSRV,Essentials]
