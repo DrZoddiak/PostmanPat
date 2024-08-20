@@ -33,8 +33,8 @@ public class EconSlashCommands extends EssxData {
 
         var amount = event.getOption("amount").getAsDouble();
 
-        if (amount <= 0) {
-            event.reply("Amount must be more than 0!").setEphemeral(true).queue();
+        if (amount <= 0.00) {
+            event.reply("Amount must be more than 0.00!").setEphemeral(true).queue();
             return;
         }
 
@@ -73,6 +73,8 @@ public class EconSlashCommands extends EssxData {
         event.replyEmbeds(embed).queue();
     }
 
+    DecimalFormat decimalFormat = new DecimalFormat("#,###.##");
+
     public void balanceUserCommand(SlashCommandEvent event) {
         var senderUser = getEssxUser(event);
 
@@ -86,7 +88,7 @@ public class EconSlashCommands extends EssxData {
 
         var balance = plugin.getEcon().getBalance(plugin.getServer().getOfflinePlayer(targetUser.getUUID()));
 
-        var roundedBalance = new DecimalFormat("#.##").format(balance);
+        var roundedBalance = decimalFormat.format(balance);
 
         var embed = new EmbedBuilder()
                 .setTitle("Balance for " + targetUser.getName())
