@@ -8,6 +8,7 @@ import me.zodd.postmanpat.PostmanPat;
 import me.zodd.postmanpat.PostmanPatConfig;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
 
 public class EconSlashCommands extends EssxData {
     PostmanPat plugin;
@@ -85,14 +86,15 @@ public class EconSlashCommands extends EssxData {
 
         var balance = plugin.getEcon().getBalance(plugin.getServer().getOfflinePlayer(targetUser.getUUID()));
 
+        var roundedBalance = new DecimalFormat("#.##").format(balance);
+
         var embed = new EmbedBuilder()
                 .setTitle("Balance for " + targetUser.getName())
                 .setColor(Color.green)
-                .setDescription("They currently have " + PostmanPatConfig.currencySymbol + balance + " available in their in-game balance")
+                .setDescription("They currently have " + PostmanPatConfig.currencySymbol + roundedBalance + " available in their in-game balance")
                 .setFooter(PostmanPatConfig.serverBranding)
                 .build();
 
         event.replyEmbeds(embed).queue();
-
     }
 }
