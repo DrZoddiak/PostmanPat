@@ -7,6 +7,8 @@ import net.essentialsx.api.v2.events.UserMailEvent;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 
+import java.util.ArrayList;
+
 public class MailListeners extends EssxData {
     PostmanPat plugin;
 
@@ -28,9 +30,12 @@ public class MailListeners extends EssxData {
         }
 
         var msg = event.getMessage();
+        var senderUUID = msg.getSenderUUID();
+        var senderUser = getEssxUser(senderUUID);
+
         var mailManager = new DiscordMailManager(msg);
-        var p = event.getRecipient();
-        var discordID = mgr().getDiscordId(p.getUUID());
+        var recipient = event.getRecipient();
+        var discordID = mgr().getDiscordId(recipient.getUUID());
         if (discordID == null) {
             plugin.getLogger().warning("Failed to retrieve discord ID, account may not be linked.");
             return;
@@ -38,6 +43,14 @@ public class MailListeners extends EssxData {
         var user = plugin.getJda().getUserById(discordID);
         if (user == null) {
             plugin.getLogger().warning("Failed to get user by ID, are they in the guild?");
+            return;
+        }
+
+        var ignores = MailUserStorage.mailIgnoreList.getOrDefault(recipient.getUUID(), new ArrayList<>());
+
+        if (getEssxUser(user.getId()).isIgnoredPlayer(senderUser) || (!ignores.isEmpty() && ignores.contains(senderUUID))) {
+            // Don't send a message if ignoring player
+            // They will still receive the mail, just not through discord
             return;
         }
 

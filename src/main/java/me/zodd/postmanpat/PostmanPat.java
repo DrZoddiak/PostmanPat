@@ -14,6 +14,7 @@ import github.scarsz.discordsrv.util.DiscordUtil;
 import me.zodd.postmanpat.econ.EconSlashCommands;
 import me.zodd.postmanpat.mail.MailListeners;
 import me.zodd.postmanpat.mail.MailSlashCommands;
+import me.zodd.postmanpat.mail.MailUserStorage;
 import net.essentialsx.api.v2.events.UserMailEvent;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -31,13 +32,20 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
     Economy econ;
     MailSlashCommands mailCommands = new MailSlashCommands(this);
     EconSlashCommands econCommands = new EconSlashCommands(this);
+    ConfigManager userStorageManager;
 
 
     @Override
     public void onEnable() {
         loadConfig();
 
-        loadEcon();
+        loadMailUserStorage();
+
+        if (!loadEcon()) {
+            getServer().getPluginManager().disablePlugin(this);
+            getLogger().info("Failed to load economy! This plugin requires Vault!");
+            return;
+        }
 
         Bukkit.getPluginManager().registerEvent(UserMailEvent.class, new Listener() {
         }, EventPriority.NORMAL, new MailListeners(this)::userMailListener, this);
@@ -59,6 +67,19 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
         ConfigManager.create(this).target(PostmanPatConfig.class).saveDefaults().load();
     }
 
+    void loadMailUserStorage() {
+        userStorageManager = ConfigManager.create(this, "userstorage.yaml")
+                .addConverter(UUID.class, UUID::fromString, UUID::toString)
+                .target(MailUserStorage.class)
+                .saveDefaults()
+                .load();
+    }
+
+    public void saveMailUserStorage() {
+        userStorageManager.save();
+    }
+
+    // todo: Convert to a single path (*) and write a command dispatcher
     @SlashCommand(path = "mail/*")
     public void processMailSlashCommand(SlashCommandEvent event) {
         var sub = event.getSubcommandName();
@@ -68,6 +89,8 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
             mailCommands.mailSendCommand(event);
         } else if (sub.contentEquals(PostmanPatConfig.markReadSubCommand)) {
             mailCommands.markAsReadCommand(event);
+        } else if (sub.contentEquals(PostmanPatConfig.ignoreUserSubCommand)) {
+            mailCommands.ignoreUserCommand(event);
         }
     }
 
@@ -83,6 +106,7 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
 
     @Override
     public void onDisable() {
+        saveMailUserStorage();
     }
 
     public JDA getJda() {
@@ -109,10 +133,16 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
                                 new SubcommandData(PostmanPatConfig.readSubCommand, "read mail")
                                         .addOption(OptionType.INTEGER, "page", "page number to view", false)
                                         .addOption(OptionType.BOOLEAN, PostmanPatConfig.includeReadArg, "include all mail including already read"),
+
                                 new SubcommandData(PostmanPatConfig.sendSubCommand, "send mail")
                                         .addOption(OptionType.USER, "user", "user to send mail to.", true)
                                         .addOption(OptionType.STRING, "message", "message to send to the user", true),
-                                new SubcommandData(PostmanPatConfig.markReadSubCommand, "Marks all mail as having been read.")
+
+                                new SubcommandData(PostmanPatConfig.markReadSubCommand, "Marks all mail as having been read."),
+
+                                new SubcommandData(PostmanPatConfig.ignoreUserSubCommand, "Toggle receiving messages from a user")
+                                        .addOption(OptionType.USER, "user", "User to toggle ignoring", false)
+                                        .addOption(OptionType.STRING, "uuid", "Use a players UUID directly", false)
                         )
                 ),
                 new PluginSlashCommand(this, new CommandData("pay", "Pay's the target user a specified amount")
@@ -120,7 +150,7 @@ public final class PostmanPat extends JavaPlugin implements SlashCommandProvider
                         .addOption(OptionType.NUMBER, "amount", "amount to pay user", true)
                 ),
                 new PluginSlashCommand(this, new CommandData("bal", "Checks the balance of the target or sender")
-                        .addOption(OptionType.USER, "user", "user to send money to", false)
+                        .addOption(OptionType.USER, "user", "User to check balance of", false)
                 )
 
         ));

@@ -20,6 +20,9 @@ public class PostmanPatConfig {
     @Comment("Subcommand for marking all unread mail as read")
     public static String markReadSubCommand = "mark-read";
 
+    @Comment("Subcommand for ignoring a user")
+    public static String ignoreUserSubCommand = "ignore";
+
     @Comment("Argument for including mail that is already read")
     public static String includeReadArg = "include-read";
 

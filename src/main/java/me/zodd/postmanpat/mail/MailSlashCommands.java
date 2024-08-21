@@ -18,6 +18,58 @@ public class MailSlashCommands extends EssxData {
         this.plugin = plugin;
     }
 
+    public void ignoreUserCommand(SlashCommandEvent event) {
+        var user = getEssxUser(event);
+
+        var userOpt = event.getOption("user");
+        var uuidOpt = event.getOption("uuid");
+
+        if (userOpt == null && uuidOpt == null) {
+            event.reply("You may target a user by their @, or by a players UUID!").setEphemeral(true).queue();
+            return;
+        }
+
+        UUID targetUUID = null;
+        if (userOpt != null) {
+            targetUUID = getEssxUser(userOpt.getAsUser().getId()).getUUID();
+        } else if (uuidOpt != null) {
+            targetUUID = UUID.fromString(uuidOpt.getAsString());
+        }
+
+        if (targetUUID == null) {
+            event.reply("UUID malformed").setEphemeral(true).queue();
+            return;
+        }
+
+        var userList = MailUserStorage.mailIgnoreList.getOrDefault(user.getUUID(), new ArrayList<>());
+
+        var targetUser = getEssxUser(targetUUID);
+
+        String targetName;
+        if (targetUser == null) {
+            targetName = targetUUID.toString();
+        } else {
+            targetName = targetUser.getName();
+        }
+
+        // Toggle users existence in List
+        // todo: This could afford to be cleaned up.
+        if (userList.contains(targetUUID)) {
+            userList.remove(targetUUID);
+            event.reply("You have removed " + targetName + " to your ignore list.")
+                    .setEphemeral(true)
+                    .queue();
+        } else {
+            userList.add(targetUUID);
+            event.reply("You have added " + targetName + " to your ignore list.")
+                    .setEphemeral(true)
+                    .queue();
+        }
+
+        MailUserStorage.mailIgnoreList.put(user.getUUID(), userList);
+        plugin.saveMailUserStorage();
+    }
+
     public void markAsReadCommand(SlashCommandEvent event) {
         var user = getEssxUser(event.getUser().getId());
         markMailAsRead(user, user.getMailMessages());
