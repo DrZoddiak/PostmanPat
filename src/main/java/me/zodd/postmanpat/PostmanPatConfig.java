@@ -38,4 +38,7 @@ public class PostmanPatConfig {
 
     @Comment("Whenever this plugin displays a currency symbol this is what it will use")
     public static String currencySymbol = "$";
+
+    @Comment("Minimum amount a user is allowed to send.")
+    public static double minSendable = 0.01;
 }

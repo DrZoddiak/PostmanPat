@@ -33,8 +33,8 @@ public class EconSlashCommands extends EssxData {
 
         var amount = event.getOption("amount").getAsDouble();
 
-        if (amount <= 0.00) {
-            event.reply("Amount must be more than 0.00!").setEphemeral(true).queue();
+        if (amount <= PostmanPatConfig.minSendable) {
+            event.reply("Amount must be more than " + PostmanPatConfig.minSendable + "!").setEphemeral(true).queue();
             return;
         }
 
@@ -66,7 +66,7 @@ public class EconSlashCommands extends EssxData {
         var embed = new EmbedBuilder()
                 .setTitle("Payment")
                 .setColor(Color.green)
-                .setDescription("You have sent " + PostmanPatConfig.currencySymbol + amount + " to " + targetUser.getName())
+                .setDescription("You have sent " + PostmanPatConfig.currencySymbol +  decimalFormat.format(amount) + " to " + targetUser.getName())
                 .setFooter(PostmanPatConfig.serverBranding)
                 .build();
 
@@ -88,12 +88,10 @@ public class EconSlashCommands extends EssxData {
 
         var balance = plugin.getEcon().getBalance(plugin.getServer().getOfflinePlayer(targetUser.getUUID()));
 
-        var roundedBalance = decimalFormat.format(balance);
-
         var embed = new EmbedBuilder()
                 .setTitle("Balance for " + targetUser.getName())
                 .setColor(Color.green)
-                .setDescription("They currently have " + PostmanPatConfig.currencySymbol + roundedBalance + " available in their in-game balance")
+                .setDescription("They currently have " + PostmanPatConfig.currencySymbol + decimalFormat.format(balance) + " available in their in-game balance")
                 .setFooter(PostmanPatConfig.serverBranding)
                 .build();
 
