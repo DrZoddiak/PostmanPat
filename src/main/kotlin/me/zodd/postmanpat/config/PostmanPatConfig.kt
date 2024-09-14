@@ -41,7 +41,7 @@ data class MailCommandConfig(
 @ConfigSerializable
 data class EconCommandConfig(
     val payCommand: String = "pay",
-    val balCommand: String = "bal",
+    val balCommand: String = "balance",
     val sendSubCommand: String = "send",
     val markReadSubCommand: String = "mark-read",
     val ignoreSubCommand: String = "ignore",
