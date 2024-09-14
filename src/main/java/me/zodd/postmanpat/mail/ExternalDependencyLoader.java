@@ -10,10 +10,8 @@ import org.eclipse.aether.repository.RemoteRepository;
 import java.util.List;
 import java.util.stream.Stream;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ExternalDependencyLoader implements PluginLoader {
-
-    // Mirror Repo for MavenCentral
-    private final String mirrorURL = "http://129.153.81.179:8080/releases";
 
     private final List<Dependency> artifacts = Stream.of(
                     "org.jetbrains.kotlin:kotlin-stdlib:2.0.20",
@@ -27,6 +25,8 @@ public class ExternalDependencyLoader implements PluginLoader {
     @Override
     public void classloader(PluginClasspathBuilder classpathBuilder) {
         var resolver = new MavenLibraryResolver();
+        // Mirror Repo for MavenCentral
+        String mirrorURL = "http://129.153.81.179:8080/releases";
         resolver.addRepository(new RemoteRepository.Builder("mavenCentralMirror", "default", mirrorURL).build());
         artifacts.forEach(resolver::addDependency);
         classpathBuilder.addLibrary(resolver);

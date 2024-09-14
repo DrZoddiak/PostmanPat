@@ -106,7 +106,6 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
     }
 
 
-    // todo: Convert to a single path (*) and write a command dispatcher
     @SlashCommand(path = "*")
     fun processMailSlashCommand(event: SlashCommandEvent) {
 

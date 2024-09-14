@@ -45,9 +45,6 @@ class MailSlashCommands(private val plugin: PostmanPat) : EssxData(plugin) {
             targetUser.name
         }
 
-        // Toggle users existence in List
-        // todo: This could afford to be cleaned up.
-
         if (userList.remove(targetUUID)) {
             event.reply("You have removed $targetName to your ignore list.")
                 .setEphemeral(true)
