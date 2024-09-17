@@ -1,5 +1,4 @@
 plugins {
-    id("java")
     id("xyz.jpenilla.run-paper") version "2.3.0"
     kotlin("jvm")
 }
@@ -12,6 +11,7 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven(url = "https://oss.sonatype.org/content/groups/public/")
     maven (url = "https://repo.essentialsx.net/releases/")
+    // DiscordSRV
     maven (url = "https://nexus.scarsz.me/content/repositories/public/")
     // VaultAPI
     maven (url = "https://jitpack.io")
@@ -25,7 +25,6 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("org.spongepowered:configurate-hocon:4.1.2")
     compileOnly("org.spongepowered:configurate-extra-kotlin:4.1.2")
-    compileOnly(kotlin("stdlib-jdk8"))
 }
 
 val targetJavaVersion = 21
