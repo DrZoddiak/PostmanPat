@@ -4,12 +4,30 @@ import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
 import me.zodd.postmanpat.EssxData
 import me.zodd.postmanpat.PostmanPat
-import me.zodd.postmanpat.config.PostmanPatConfig
+import me.zodd.postmanpat.PostmanPat.Companion.configManager
+import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.command.PPSlashCommand
 import java.awt.Color
 import java.text.DecimalFormat
 
 class EconSlashCommands(private val plugin: PostmanPat) : EssxData(plugin) {
-    private val config = PostmanPatConfig.config
+
+    enum class EconCommands(override val command: String) : PPSlashCommand<EconCommands> {
+        ECON_PAY(configManager.conf.commandConfig.econCommands.payCommand),
+        ECON_BALANCE(configManager.conf.commandConfig.econCommands.balCommand),
+        ;
+
+        private val mailCommands: EconSlashCommands = EconSlashCommands(plugin)
+
+        override fun exec(): (SlashCommandEvent) -> Unit {
+            return when (this) {
+                ECON_PAY -> mailCommands::payUserCommand
+                ECON_BALANCE -> mailCommands::balanceUserCommand
+            }
+        }
+    }
+
+    private val config = PostmanPat.configManager.conf
     private val econConfig = config.commandConfig.econCommands
     private val decimalFormat = DecimalFormat(econConfig.decimalFormat)
 

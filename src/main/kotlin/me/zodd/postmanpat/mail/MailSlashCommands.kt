@@ -5,12 +5,34 @@ import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCom
 import me.zodd.postmanpat.EssxData
 import me.zodd.postmanpat.PostmanPat
 import me.zodd.postmanpat.PostmanPat.Companion.configManager
+import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.PostmanPat.Companion.userStorageManager
+import me.zodd.postmanpat.command.PPSlashCommand
 import net.essentialsx.api.v2.services.mail.MailMessage
 import java.util.UUID
 
-
 class MailSlashCommands(private val plugin: PostmanPat) : EssxData(plugin) {
+
+    enum class MailCommands(override val command: String) : PPSlashCommand<MailCommands> {
+        MAIL_BASE(configManager.conf.commandConfig.mailCommands.baseCommand),
+        MAIL_READ(configManager.conf.commandConfig.mailCommands.readSubCommand),
+        MAIL_SEND(configManager.conf.commandConfig.mailCommands.sendSubCommand),
+        MAIL_MARK_READ(configManager.conf.commandConfig.mailCommands.markReadSubCommand),
+        MAIL_IGNORE(configManager.conf.commandConfig.mailCommands.ignoreSubCommand);
+
+        private val mailCommands: MailSlashCommands = MailSlashCommands(plugin)
+
+        override fun exec(): (SlashCommandEvent) -> Unit {
+            return when (this) {
+                MAIL_READ -> mailCommands::mailReadCommand
+                MAIL_SEND -> mailCommands::mailSendCommand
+                MAIL_MARK_READ -> mailCommands::markAsReadCommand
+                MAIL_IGNORE -> mailCommands::ignoreUserCommand
+                MAIL_BASE -> { _ -> /*This command is never run*/ }
+            }
+        }
+    }
+
     fun ignoreUserCommand(event: SlashCommandEvent) {
         val user = getEssxUser(event) ?: run {
             event.reply("Unable to find Minecraft User!").setEphemeral(true).queue()
@@ -25,7 +47,6 @@ class MailSlashCommands(private val plugin: PostmanPat) : EssxData(plugin) {
             return
         }
 
-
         val targetUUID = if (userOpt != null) {
             getEssxUser(userOpt.asUser.id)?.uuid
         } else {
@@ -36,7 +57,7 @@ class MailSlashCommands(private val plugin: PostmanPat) : EssxData(plugin) {
         }
 
         val userList: MutableList<UUID> =
-            userStorageManager.conf.mailIgnoreList.getOrDefault(user?.uuid, mutableListOf())
+            userStorageManager.conf.mailIgnoreList.getOrDefault(user.uuid, mutableListOf())
 
         val targetUser = getEssxUser(targetUUID)
         val targetName = if (targetUser == null) {

@@ -1,75 +1,27 @@
 package me.zodd.postmanpat.config;
 
-import me.zodd.postmanpat.PostmanPat
-import org.spongepowered.configurate.CommentedConfigurationNode
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader
-import org.spongepowered.configurate.kotlin.objectMapperFactory
+import me.zodd.postmanpat.econ.EconCommandConfig
+import me.zodd.postmanpat.mail.MailCommandConfig
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
-import org.spongepowered.configurate.reference.ValueReference
-import java.nio.file.Path
-import kotlin.reflect.KClass
-
+import org.spongepowered.configurate.objectmapping.meta.Comment
 
 @ConfigSerializable
 data class PostmanPatConfig(
+    @field:Comment("The discord Channel ID to ping users if DMs are disabled")
     val notificationChannel: Long = 0L,
+    @field:Comment(
+        """Maximum characters a message can be. Discord sets a limit at 2000.
+        Default value is set to 1900 to allow for some additional meta-data
+        It is suggested you do not raise this value above 1900, lest ye risk errors"""
+    )
     val maxMessageSize: Int = 1900,
+    @field:Comment("Will appear at the footer of embeds")
     val serverBranding: String = "Powered by PostmanPat",
     val commandConfig: CommandConfig = CommandConfig(),
-) {
-    companion object {
-        val config = PostmanPatConfig()
-    }
-}
+)
 
 @ConfigSerializable
 data class CommandConfig(
     val mailCommands: MailCommandConfig = MailCommandConfig(),
     val econCommands: EconCommandConfig = EconCommandConfig()
 )
-
-@ConfigSerializable
-data class MailCommandConfig(
-    val baseCommand: String = "mail",
-    val readSubCommand: String = "read",
-    val includeReadArg: String = "include-read",
-    val sendSubCommand: String = "send",
-    val markReadSubCommand: String = "mark-read",
-    val ignoreSubCommand: String = "ignore",
-)
-
-@ConfigSerializable
-data class EconCommandConfig(
-    val payCommand: String = "pay",
-    val balCommand: String = "balance",
-    val sendSubCommand: String = "send",
-    val markReadSubCommand: String = "mark-read",
-    val ignoreSubCommand: String = "ignore",
-    val minimumSendable: Double = 0.01,
-    val currencySymbol: String = "$",
-    val decimalFormat : String = "#,###.##",
-)
-
-class ConfigManager<T : Any>(plugin: PostmanPat, fileName: String, clazz: KClass<T>) {
-
-    private val loader: HoconConfigurationLoader = HoconConfigurationLoader.builder()
-        .path(Path.of("${plugin.dataPath}/$fileName.conf"))
-        .defaultOptions { opts ->
-            opts.serializers { serializer ->
-                serializer.registerAnnotatedObjects(objectMapperFactory()).build()
-            }
-        }.build()
-
-    private val root: ValueReference<T, CommentedConfigurationNode>? =
-        loader.loadToReference().referenceTo(clazz.java)
-
-    val conf: T = root?.get() ?: clazz.java.getDeclaredConstructor().newInstance()
-
-    init {
-        save()
-    }
-
-    fun save() {
-        root?.setAndSave(conf)
-    }
-}

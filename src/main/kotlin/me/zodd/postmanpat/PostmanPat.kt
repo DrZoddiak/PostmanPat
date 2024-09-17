@@ -13,9 +13,9 @@ import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build
 import github.scarsz.discordsrv.util.DiscordUtil
 import me.zodd.postmanpat.config.ConfigManager
 import me.zodd.postmanpat.config.PostmanPatConfig
-import me.zodd.postmanpat.econ.EconSlashCommands
+import me.zodd.postmanpat.econ.EconSlashCommands.EconCommands
 import me.zodd.postmanpat.mail.MailListeners
-import me.zodd.postmanpat.mail.MailSlashCommands
+import me.zodd.postmanpat.mail.MailSlashCommands.MailCommands
 import me.zodd.postmanpat.mail.MailUserStorage
 import net.essentialsx.api.v2.events.UserMailEvent
 import net.milkbowl.vault.economy.Economy
@@ -42,10 +42,13 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
         val plugin by lazy { getPlugin(PostmanPat::class.java) }
         val configManager by lazy { ConfigManager(plugin, "postmanpatConfig", PostmanPatConfig::class) }
         val userStorageManager by lazy { ConfigManager(plugin, "userStorage", MailUserStorage::class) }
-
     }
 
     override fun onEnable() {
+        // Initializes ConfigManagers
+        userStorageManager
+        configManager
+
         Bukkit.getPluginManager().registerEvent(
             UserMailEvent::class.java, object : Listener {
             }, EventPriority.NORMAL,
@@ -56,59 +59,15 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
     }
 
     private fun loadEcon(): Economy? {
-        // Verify Vault is loaded
         server.pluginManager.getPlugin("Vault") ?: return null
         val rsp = server.servicesManager.getRegistration(Economy::class.java) ?: return null
         return rsp.provider
     }
 
 
-    enum class MailCommands(override val command: String) : PPSlashCommand<MailCommands> {
-        MAIL_BASE(configManager.conf.commandConfig.mailCommands.baseCommand),
-        MAIL_READ(configManager.conf.commandConfig.mailCommands.readSubCommand),
-        MAIL_SEND(configManager.conf.commandConfig.mailCommands.sendSubCommand),
-        MAIL_MARK_READ(configManager.conf.commandConfig.mailCommands.markReadSubCommand),
-        MAIL_IGNORE(configManager.conf.commandConfig.mailCommands.ignoreSubCommand);
-
-
-        private val mailCommands: MailSlashCommands = MailSlashCommands(plugin)
-
-        override fun exec(): (SlashCommandEvent) -> Unit {
-            return when (this) {
-                MAIL_READ -> mailCommands::mailReadCommand
-                MAIL_SEND -> mailCommands::mailSendCommand
-                MAIL_MARK_READ -> mailCommands::markAsReadCommand
-                MAIL_IGNORE -> mailCommands::ignoreUserCommand
-                MAIL_BASE -> { _ -> /*This command is never run*/ }
-            }
-        }
-    }
-
-    enum class EconCommands(override val command: String) : PPSlashCommand<EconCommands> {
-        ECON_PAY(configManager.conf.commandConfig.econCommands.payCommand),
-        ECON_BALANCE(configManager.conf.commandConfig.econCommands.balCommand),
-        ;
-
-        private val mailCommands: EconSlashCommands = EconSlashCommands(plugin)
-
-        override fun exec(): (SlashCommandEvent) -> Unit {
-            return when (this) {
-                ECON_PAY -> mailCommands::payUserCommand
-                ECON_BALANCE -> mailCommands::balanceUserCommand
-            }
-        }
-    }
-
-    interface PPSlashCommand<T : PPSlashCommand<T>> {
-        val command: String
-
-        fun exec(): (SlashCommandEvent) -> Unit
-    }
-
 
     @SlashCommand(path = "*")
     fun processMailSlashCommand(event: SlashCommandEvent) {
-
         when (event.commandPath) {
             EconCommands.ECON_PAY.command -> EconCommands.ECON_PAY
             EconCommands.ECON_BALANCE.command -> EconCommands.ECON_BALANCE
@@ -121,14 +80,12 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
             }
 
             else -> null
-        }?.exec()?.invoke(event) ?: run {
-            logger.info("Could not find command")
-        }
+        }?.exec()?.invoke(event)
     }
 
 
     override fun onDisable() {
-        //saveMailUserStorage()
+        userStorageManager.save()
     }
 
     val jda: JDA
