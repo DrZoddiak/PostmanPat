@@ -1,4 +1,4 @@
-package me.zodd.postmanpat.mail
+package me.zodd.postmanpat
 
 import com.earth2me.essentials.User
 import github.scarsz.discordsrv.api.commands.PluginSlashCommand

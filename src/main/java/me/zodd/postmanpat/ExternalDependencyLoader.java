@@ -1,4 +1,4 @@
-package me.zodd.postmanpat.mail;
+package me.zodd.postmanpat;
 
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
