@@ -56,7 +56,7 @@ class MailListeners(private var plugin: PostmanPat) {
                     { }
                 ) OnFail@{
                     // If we're unable to send a DM to the user
-                    val channelID = plugin.configManager.conf.notificationChannel
+                    val channelID = plugin.configManager.conf.moduleConfig.mail.notificationChannel
                     val channel =
                         plugin.jda.getTextChannelById(channelID)
                     if (channel == null) {

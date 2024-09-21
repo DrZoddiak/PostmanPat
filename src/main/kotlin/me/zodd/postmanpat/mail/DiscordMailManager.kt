@@ -30,7 +30,7 @@ class DiscordMailManager internal constructor(
         }
     }
 
-    private val maxSize: Int = plugin.configManager.conf.maxMessageSize
+    private val maxSize: Int = plugin.configManager.conf.moduleConfig.mail.maxMessageSize
 
     fun splitContent(content: String): List<String> {
         return appendPageNumbers(content.chunked(maxSize))

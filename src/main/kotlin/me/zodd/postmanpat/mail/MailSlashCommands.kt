@@ -17,11 +17,11 @@ import java.util.UUID
 class MailSlashCommands : PostmanCommandProvider {
 
     enum class MailCommands(override val command: String) : PPSlashCommand<MailCommands> {
-        MAIL_BASE(plugin.configManager.conf.commandConfig.mailCommands.baseCommand),
-        MAIL_READ(plugin.configManager.conf.commandConfig.mailCommands.readSubCommand),
-        MAIL_SEND(plugin.configManager.conf.commandConfig.mailCommands.sendSubCommand),
-        MAIL_MARK_READ(plugin.configManager.conf.commandConfig.mailCommands.markReadSubCommand),
-        MAIL_IGNORE(plugin.configManager.conf.commandConfig.mailCommands.ignoreSubCommand);
+        MAIL_BASE(plugin.configManager.conf.moduleConfig.mail.baseCommand),
+        MAIL_READ(plugin.configManager.conf.moduleConfig.mail.readSubCommand),
+        MAIL_SEND(plugin.configManager.conf.moduleConfig.mail.sendSubCommand),
+        MAIL_MARK_READ(plugin.configManager.conf.moduleConfig.mail.markReadSubCommand),
+        MAIL_IGNORE(plugin.configManager.conf.moduleConfig.mail.ignoreSubCommand);
 
         override fun exec(): (SlashCommandEvent) -> Unit {
             return when (this) {
@@ -97,7 +97,7 @@ class MailSlashCommands : PostmanCommandProvider {
             }
             val mailMessage = user.mailMessages
 
-            val includeRead = event.getOption(plugin.configManager.conf.commandConfig.mailCommands.includeReadArg)
+            val includeRead = event.getOption(plugin.configManager.conf.moduleConfig.mail.includeReadArg)
             val includeBool = includeRead != null && includeRead.asBoolean
 
             if (!includeBool && user.unreadMailAmount <= 0) {
@@ -182,7 +182,7 @@ class MailSlashCommands : PostmanCommandProvider {
                             .addOption(OptionType.INTEGER, "page", "page number to view", false)
                             .addOption(
                                 OptionType.BOOLEAN,
-                                plugin.configManager.conf.commandConfig.mailCommands.includeReadArg,
+                                plugin.configManager.conf.moduleConfig.mail.includeReadArg,
                                 "include all mail including already read"
                             ),
 

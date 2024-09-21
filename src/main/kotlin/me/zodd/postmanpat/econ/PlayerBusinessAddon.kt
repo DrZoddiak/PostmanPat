@@ -16,7 +16,7 @@ class PlayerBusinessAddon {
         PlayerBusinessesAPI.getInstance()
     }
 
-    private val econConfig = plugin.configManager.conf.commandConfig.econCommands
+    private val econConfig = plugin.configManager.conf.moduleConfig.econ
     private val decimalFormat = DecimalFormat(econConfig.decimalFormat)
 
     internal val businesses: List<Business> get() = pba.businesses

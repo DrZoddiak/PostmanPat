@@ -4,7 +4,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.meta.Comment
 
 @ConfigSerializable
-data class EconCommandConfig(
+data class EconConfig(
     @field:Comment("Command for users to pay each other")
     val payCommand: String = "pay",
     @field:Comment("Command for users to check balances")

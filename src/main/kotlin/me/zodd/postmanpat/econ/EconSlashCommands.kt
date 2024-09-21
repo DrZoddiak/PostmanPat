@@ -20,10 +20,10 @@ import java.text.DecimalFormat
 class EconSlashCommands : PostmanCommandProvider {
 
     enum class EconCommands(override val command: String) : PPSlashCommand<EconCommands> {
-        ECON_PAY(plugin.configManager.conf.commandConfig.econCommands.payCommand),
-        ECON_BALANCE(plugin.configManager.conf.commandConfig.econCommands.balCommand),
-        ECON_FIRM_BASE(plugin.configManager.conf.commandConfig.econCommands.firmBaseCommand),
-        ECON_FIRM_PAY(plugin.configManager.conf.commandConfig.econCommands.firmPayCommand)
+        ECON_PAY(plugin.configManager.conf.moduleConfig.econ.payCommand),
+        ECON_BALANCE(plugin.configManager.conf.moduleConfig.econ.balCommand),
+        ECON_FIRM_BASE(plugin.configManager.conf.moduleConfig.econ.firmBaseCommand),
+        ECON_FIRM_PAY(plugin.configManager.conf.moduleConfig.econ.firmPayCommand)
         ;
 
         companion object {
@@ -48,7 +48,7 @@ class EconSlashCommands : PostmanCommandProvider {
         }
 
         private val config = plugin.configManager.conf
-        private val econConfig = config.commandConfig.econCommands
+        private val econConfig = config.moduleConfig.econ
         private val decimalFormat = DecimalFormat(econConfig.decimalFormat)
 
         private val econ by lazy {
