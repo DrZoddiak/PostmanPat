@@ -35,7 +35,7 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
     val econ: Economy? by lazy {
         loadEcon() ?: run {
             server.pluginManager.disablePlugin(this)
-            logger.info("Failed to load economy! This plugin requires Vault!")
+            logger.warning("Failed to load economy! This plugin requires Vault!")
             null
         }
     }

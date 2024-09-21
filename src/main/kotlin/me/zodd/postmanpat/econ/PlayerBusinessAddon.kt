@@ -44,7 +44,6 @@ class PlayerBusinessAddon {
             val check = permCheck.contains(BusinessPermission.FINANCIAL)
                     || permCheck.contains(BusinessPermission.PROPRIETOR)
                     || permCheck.contains(BusinessPermission.ADMINISTRATOR)
-            plugin.logger.info("${it.role.permission}")
             it.uuid == senderUser.uuid && check
         } ?: run {
             event.reply("You do not have permission to transfer funds from this business")

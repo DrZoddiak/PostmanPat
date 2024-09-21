@@ -60,7 +60,7 @@ class MailListeners(private var plugin: PostmanPat) {
                     val channel =
                         plugin.jda.getTextChannelById(channelID)
                     if (channel == null) {
-                        plugin.logger.info("Unable to find configured discord channel! $channelID")
+                        plugin.logger.warning("Unable to find configured discord channel! $channelID")
                         return@OnFail
                     }
                     channel.sendMessage(user.asMention + " You have received mail! Check it with `/mail read`!")

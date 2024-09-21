@@ -53,7 +53,7 @@ class EconSlashCommands : PostmanCommandProvider {
 
         private val econ by lazy {
             plugin.econ ?: run {
-                plugin.logger.info("Econ not loaded, aborting!")
+                plugin.logger.warning("Econ not loaded, aborting!")
                 null
             }
         }
