@@ -15,7 +15,7 @@ data class MailConfig(
     val sendSubCommand: String = "send",
     @field:Comment("Sub command to mark existing mail as read")
     val markReadSubCommand: String = "mark-read",
-    @field:Comment("Sub command to ")
+    @field:Comment("Sub command to ignore mail from certain users")
     val ignoreSubCommand: String = "ignore",
     @field:Comment("The discord Channel ID to ping users if DMs are disabled")
     val notificationChannel: Long = 0L,
