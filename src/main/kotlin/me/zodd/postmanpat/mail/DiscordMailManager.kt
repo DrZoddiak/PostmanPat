@@ -1,6 +1,6 @@
 package me.zodd.postmanpat.mail
 
-import me.zodd.postmanpat.PostmanPat.Companion.configManager
+import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import net.essentialsx.api.v2.services.mail.MailMessage
 import java.time.Instant
 
@@ -30,7 +30,7 @@ class DiscordMailManager internal constructor(
         }
     }
 
-    private val maxSize: Int = configManager.conf.maxMessageSize
+    private val maxSize: Int = plugin.configManager.conf.maxMessageSize
 
     fun splitContent(content: String): List<String> {
         return appendPageNumbers(content.chunked(maxSize))

@@ -15,3 +15,6 @@ dependencies:
     Vault:
         load: BEFORE
         required: true
+    DemocracyBusiness:
+        load : BEFORE
+        required: false

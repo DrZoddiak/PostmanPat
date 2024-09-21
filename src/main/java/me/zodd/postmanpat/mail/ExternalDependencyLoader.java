@@ -26,8 +26,9 @@ public class ExternalDependencyLoader implements PluginLoader {
     public void classloader(PluginClasspathBuilder classpathBuilder) {
         var resolver = new MavenLibraryResolver();
         // Mirror Repo for MavenCentral
-        String mirrorURL = "http://129.153.81.179:8080/releases";
-        resolver.addRepository(new RemoteRepository.Builder("mavenCentralMirror", "default", mirrorURL).build());
+        String mirrorURL = "http://129.153.81.179:8080/#/releases";
+        String envVarUrl = System.getenv("MavenMirrorURL");
+        resolver.addRepository(new RemoteRepository.Builder("mavenCentralMirror", "default", envVarUrl != null ? envVarUrl : mirrorURL).build());
         artifacts.forEach(resolver::addDependency);
         classpathBuilder.addLibrary(resolver);
     }

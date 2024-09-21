@@ -15,4 +15,8 @@ data class EconCommandConfig(
     val currencySymbol: String = "$",
     @field:Comment("The formating to use for displaying decimal numbers")
     val decimalFormat: String = "#,###.##",
+    @field:Comment("The base command for business commands")
+    val firmBaseCommand: String = "firm",
+    @field:Comment("The sub command for issuing payments from businesses")
+    val firmPayCommand: String = "pay"
 )

@@ -1,15 +1,15 @@
 package me.zodd.postmanpat.mail
 
 import github.scarsz.discordsrv.dependencies.jda.api.entities.PrivateChannel
-import me.zodd.postmanpat.EssxData
+import me.zodd.postmanpat.EssxUtils.getEssxUser
+import me.zodd.postmanpat.EssxUtils.mgr
 import me.zodd.postmanpat.PostmanPat
-import me.zodd.postmanpat.PostmanPat.Companion.configManager
 import net.essentialsx.api.v2.events.UserMailEvent
 import org.bukkit.event.Event
 import org.bukkit.event.Listener
 import java.time.Instant
 
-class MailListeners(private var plugin: PostmanPat) : EssxData(plugin) {
+class MailListeners(private var plugin: PostmanPat) {
 
     fun userMailListener(exec: Listener?, e: Event) {
         val event = e as UserMailEvent
@@ -21,6 +21,7 @@ class MailListeners(private var plugin: PostmanPat) : EssxData(plugin) {
         val mailManager = DiscordMailManager(listOf(msg))
         val recipient = event.recipient
         val discordID = mgr().getDiscordId(recipient.uuid)
+
         if (discordID == null) {
             plugin.logger.warning("Failed to retrieve discord ID, account may not be linked.")
             return
@@ -31,7 +32,7 @@ class MailListeners(private var plugin: PostmanPat) : EssxData(plugin) {
             return
         }
 
-        val ignores = PostmanPat.userStorageManager.conf.mailIgnoreList.getOrDefault(recipient.uuid, ArrayList())
+        val ignores = plugin.userStorageManager.conf.mailIgnoreList.getOrDefault(recipient.uuid, ArrayList())
 
         if (getEssxUser(user.id)?.isIgnoredPlayer(senderUser) == true || (ignores.isNotEmpty() && ignores.contains(
                 senderUUID
@@ -52,19 +53,19 @@ class MailListeners(private var plugin: PostmanPat) : EssxData(plugin) {
         user.openPrivateChannel().queue { c: PrivateChannel ->
             mailManager.splitContent(content).forEach { m: String ->
                 c.sendMessage(m).queue(
-                    { },
-                    {
-                        // If we're unable to send a DM to the user
-                        val channelID = configManager.conf.notificationChannel
-                        val channel =
-                            plugin.jda.getTextChannelById(channelID)
-                        if (channel == null) {
-                            plugin.logger.info("Unable to find configured discord channel! $channelID")
-                            return@queue
-                        }
-                        channel.sendMessage(user.asMention + " You have received mail! Check it with `/mail read`!")
-                            .queue()
-                    })
+                    { }
+                ) OnFail@{
+                    // If we're unable to send a DM to the user
+                    val channelID = plugin.configManager.conf.notificationChannel
+                    val channel =
+                        plugin.jda.getTextChannelById(channelID)
+                    if (channel == null) {
+                        plugin.logger.info("Unable to find configured discord channel! $channelID")
+                        return@OnFail
+                    }
+                    channel.sendMessage(user.asMention + " You have received mail! Check it with `/mail read`!")
+                        .queue()
+                }
             }
         }
     }

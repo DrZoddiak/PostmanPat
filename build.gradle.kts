@@ -15,6 +15,8 @@ repositories {
     maven (url = "https://nexus.scarsz.me/content/repositories/public/")
     // VaultAPI
     maven (url = "https://jitpack.io")
+
+    maven(url = "https://repo.olziedev.com/")
 }
 
 dependencies {
@@ -25,6 +27,7 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("org.spongepowered:configurate-hocon:4.1.2")
     compileOnly("org.spongepowered:configurate-extra-kotlin:4.1.2")
+    compileOnly("com.olziedev:playerbusinesses-api:1.5.1")
 }
 
 val targetJavaVersion = 21
