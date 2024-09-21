@@ -10,7 +10,7 @@ import org.eclipse.aether.repository.RemoteRepository;
 import java.util.List;
 import java.util.stream.Stream;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "unused"})
 public class ExternalDependencyLoader implements PluginLoader {
 
     private final List<Dependency> artifacts = Stream.of(
