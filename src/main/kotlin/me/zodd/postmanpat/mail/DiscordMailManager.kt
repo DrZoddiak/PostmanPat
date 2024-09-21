@@ -18,7 +18,7 @@ class DiscordMailManager internal constructor(
     }
 
     private fun makeDisplayable(messages: List<MailMessage>): String {
-        return messages.joinToString {
+        return messages.joinToString("\n") {
             if (includeRead || !it.isRead) {
                 """
                 Sent: ${Instant.ofEpochMilli(it.timeSent)}
@@ -37,10 +37,10 @@ class DiscordMailManager internal constructor(
     }
 
     private fun appendPageNumbers(splittedContent: List<String>): List<String> {
-        return splittedContent.mapIndexed { s, i ->
+        return splittedContent.mapIndexed { i, s ->
             """
                 $s
-                [Page ${i + 1}/${splittedContent.size}
+                [Page ${i + 1}/${splittedContent.size}]
             """.trimIndent()
         }
     }
