@@ -152,25 +152,13 @@ class EconSlashCommands : PostmanCommandProvider {
             )
         )
         // Add command if PlayerBusinesses is enabled
-        pba?.let { playerBusinessAddon ->
+        pba?.let {
             commands.add(
                 PluginSlashCommand(
                     plugin, CommandData(EconCommands.ECON_FIRM_BASE.command, "Base command for business transactions")
                         .addSubcommands(
                             SubcommandData(EconCommands.ECON_FIRM_PAY.command, "Command to pay from your business")
-                                .addOptions(
-                                    OptionData(
-                                        OptionType.STRING,
-                                        "business",
-                                        "business to withdraw from",
-                                        true
-                                    ).addChoices(playerBusinessAddon.businesses.map {
-                                        Command.Choice(
-                                            it.name,
-                                            it.name
-                                        )
-                                    })
-                                )
+                                .addOption(OptionType.STRING, "business", "business to pay from", true)
                                 .addOption(OptionType.USER, "user", "user to pay", true)
                                 .addOption(OptionType.NUMBER, "amount", "amount to pay another user", true)
                         )

@@ -22,10 +22,6 @@ class PlayerBusinessAddon {
     private val econConfig = plugin.configManager.conf.moduleConfig.econ
     private val decimalFormat = DecimalFormat(econConfig.decimalFormat)
 
-    internal val businesses: List<Business> get() = pba.businesses
-
-
-
     internal fun firmPay(event: SlashCommandEvent) {
         val senderUser = getEssxUser(event) ?: run {
             event.replyEphemeral("Unable to find User, account may not be linked!")
@@ -41,7 +37,7 @@ class PlayerBusinessAddon {
             return
         }
 
-        val business = pba.getBusinessByName(businessName)
+        val business: Business? = pba.getBusinessByName(businessName?.lowercase())
 
         business?.staff?.firstOrNull {
             val permCheck = it.role.permission
@@ -57,8 +53,14 @@ class PlayerBusinessAddon {
         }
 
         val amount = checkAmountOption(event) ?: run {
-            event.reply("Amount provided was invalid, must be mat least ${econConfig.minimumSendable}")
+            event.reply("Amount provided was invalid, must be at least ${econConfig.minimumSendable}")
                 .setEphemeral(true)
+                .queue()
+            return
+        }
+
+        if (business.balance < amount) {
+            event.replyEphemeral("Your business doesn't have the funds for this transaction")
                 .queue()
             return
         }
