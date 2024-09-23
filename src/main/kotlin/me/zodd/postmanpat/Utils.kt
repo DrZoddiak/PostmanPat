@@ -55,7 +55,7 @@ object Utils {
         /**
          * @return An ephemerally configured message, not yet queued.
          */
-        fun SlashCommandEvent.replyEphemeralMessage(message: String) = reply(message).setEphemeral(true)
+        fun SlashCommandEvent.replyEphemeral(message: String) = reply(message).setEphemeral(true)
     }
 
 }

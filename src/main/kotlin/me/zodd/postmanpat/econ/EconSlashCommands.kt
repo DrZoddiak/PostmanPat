@@ -10,7 +10,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
-import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralMessage
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
 import me.zodd.postmanpat.command.PPSlashCommand
 import me.zodd.postmanpat.command.PostmanCommandProvider
 import me.zodd.postmanpat.econ.EconSlashCommands.EconCommands.Companion.pba
@@ -42,7 +42,7 @@ class EconSlashCommands : PostmanCommandProvider {
                 ECON_FIRM_BASE -> { _ -> /*This command is never run*/ }
                 ECON_FIRM_PAY -> { s ->
                     pba?.firmPay(s) ?: run {
-                        s.replyEphemeralMessage("Error Not loaded").queue()
+                        s.replyEphemeral("Error Not loaded").queue()
                     }
                 }
             }
@@ -61,7 +61,7 @@ class EconSlashCommands : PostmanCommandProvider {
 
         private fun payUserCommand(event: SlashCommandEvent) {
             val senderUser = getEssxUser(event) ?: run {
-                event.replyEphemeralMessage("Unable to find User, account may not be linked!").queue()
+                event.replyEphemeral("Unable to find User, account may not be linked!").queue()
                 return
             }
             val offlineSender = plugin.server.getOfflinePlayer(senderUser.uuid)
@@ -70,23 +70,21 @@ class EconSlashCommands : PostmanCommandProvider {
 
             val target = event.getOption("user")?.asUser ?: return
             val targetUser = getEssxUser(target.id) ?: run {
-                event.replyEphemeralMessage("Unable to find User, account may not be linked!").queue()
+                event.replyEphemeral("Unable to find User, account may not be linked!").queue()
                 return
             }
 
             if (!targetUser.isAcceptingPay) {
-                event.replyEphemeralMessage("Target is not accepting pay at this time!").queue()
+                event.replyEphemeral("Target is not accepting pay at this time!").queue()
             }
 
-            val amount = event.getOption("amount")?.asDouble ?: return
-
-            if (amount <= econConfig.minimumSendable) {
-                event.replyEphemeralMessage("Amount must be more than ${econConfig.minimumSendable}!").queue()
+            val amount = PostmanEconManager.checkAmountOption(event) ?: run {
+                event.replyEphemeral("Amount must be more than ${econConfig.minimumSendable}!").queue()
                 return
             }
 
             if (senderBal < amount) {
-                event.replyEphemeralMessage("You are too poor for this transaction!").queue()
+                event.replyEphemeral("You are too poor for this transaction!").queue()
                 return
             }
 
@@ -95,7 +93,7 @@ class EconSlashCommands : PostmanCommandProvider {
             // Attempt to withdraw money from sender
             val withdrawResult = econ.withdrawPlayer(offlineSender, amount)
             if (!withdrawResult.transactionSuccess()) {
-                event.replyEphemeralMessage("Failed to withdraw money from ${senderUser.name}, transaction cancelled.")
+                event.replyEphemeral("Failed to withdraw money from ${senderUser.name}, transaction cancelled.")
                     .queue()
                 return
             }
@@ -105,11 +103,11 @@ class EconSlashCommands : PostmanCommandProvider {
                 val revertResult = econ.depositPlayer(offlineSender, amount)
                 if (!revertResult.transactionSuccess()) {
                     plugin.logger.warning("Failed to revert transaction. ${senderUser.name} may be owed $amount")
-                    event.replyEphemeralMessage("Failed to revert transaction. Please contact an administrator.")
+                    event.replyEphemeral("Failed to revert transaction. Please contact an administrator.")
                         .queue()
                     return
                 }
-                event.replyEphemeralMessage("Failed to deposit money to ${targetUser.name}, transaction reverted.")
+                event.replyEphemeral("Failed to deposit money to ${targetUser.name}, transaction reverted.")
                     .queue()
                 return
             }

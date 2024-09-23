@@ -4,11 +4,12 @@ import com.olziedev.playerbusinesses.api.PlayerBusinessesAPI
 import com.olziedev.playerbusinesses.api.business.Business
 import com.olziedev.playerbusinesses.api.business.BusinessPermission
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
-import github.scarsz.discordsrv.dependencies.jda.api.entities.MessageEmbed
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
 import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralEmbed
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
+import me.zodd.postmanpat.econ.PostmanEconManager.checkAmountOption
 import java.awt.Color
 import java.text.DecimalFormat
 
@@ -23,18 +24,11 @@ class PlayerBusinessAddon {
 
     internal val businesses: List<Business> get() = pba.businesses
 
-    fun isAtleastMinimum(amount: Double): Boolean {
-        return amount >= econConfig.minimumSendable
-    }
 
-    fun checkAmountOption(event: SlashCommandEvent): Double? {
-        return event.getOption("amount")?.asDouble?.takeIf { isAtleastMinimum(it) }
-    }
 
     internal fun firmPay(event: SlashCommandEvent) {
         val senderUser = getEssxUser(event) ?: run {
-            event.reply("Unable to find User, account may not be linked!")
-                .setEphemeral(true)
+            event.replyEphemeral("Unable to find User, account may not be linked!")
                 .queue()
             return
         }
@@ -42,8 +36,7 @@ class PlayerBusinessAddon {
         val businessName = event.getOption("business")?.asString
 
         val targetUser = getEssxUser(event.getOption("user")?.asUser?.id) ?: run {
-            event.reply("Unable to find User, account may not be linked!")
-                .setEphemeral(true)
+            event.replyEphemeral("Unable to find User, account may not be linked!")
                 .queue()
             return
         }
