@@ -3,7 +3,7 @@ version: '2.0.0'
 main: me.zodd.postmanpat.PostmanPat
 description: Postman
 api-version: '1.21.1'
-loader: me.zodd.postmanpat.mail.ExternalDependencyLoader
+loader: me.zodd.postmanpat.ExternalDependencyLoader
 dependencies:
   server:
     Essentials:
