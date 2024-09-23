@@ -1,4 +1,4 @@
-package me.zodd.postmanpat.econ;
+package me.zodd.postmanpat.econ
 
 import github.scarsz.discordsrv.api.commands.PluginSlashCommand
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
