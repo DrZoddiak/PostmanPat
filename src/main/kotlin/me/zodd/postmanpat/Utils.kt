@@ -1,6 +1,7 @@
 package me.zodd.postmanpat
 
 import com.earth2me.essentials.User
+import github.scarsz.discordsrv.dependencies.jda.api.entities.MessageEmbed
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
 import github.scarsz.discordsrv.objects.managers.AccountLinkManager
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
@@ -14,7 +15,7 @@ object Utils {
          * @return An Essentials User
          */
         internal fun getEssxUser(id: String?): User? {
-            return plugin.ess?.getUser(mgr().getUuid(id))
+            return plugin.ess?.getUser(manager().getUuid(id))
         }
 
         /**
@@ -33,10 +34,28 @@ object Utils {
             return getEssxUser(event.user.id)
         }
 
-        internal fun mgr(): AccountLinkManager {
+        /**
+         * @return Account manager for DiscordSRV
+         */
+        internal fun manager(): AccountLinkManager {
             return plugin.srv.accountLinkManager
         }
     }
 
+    /**
+     * Utilities for Sending messages
+     */
+    object MessageUtils {
+        /**
+         * @return An ephemerally configured Embed, not yet queued.
+         */
+        fun SlashCommandEvent.replyEphemeralEmbed(embed: MessageEmbed, vararg embeds: MessageEmbed) =
+            replyEmbeds(embed, *embeds).setEphemeral(true)
+
+        /**
+         * @return An ephemerally configured message, not yet queued.
+         */
+        fun SlashCommandEvent.replyEphemeralMessage(message: String) = reply(message).setEphemeral(true)
+    }
 
 }

@@ -8,6 +8,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.entities.MessageEmbed
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralEmbed
 import java.awt.Color
 import java.text.DecimalFormat
 
@@ -90,7 +91,4 @@ class PlayerBusinessAddon {
 
         event.replyEphemeralEmbed(embed).queue()
     }
-
-    fun SlashCommandEvent.replyEphemeralEmbed(embed: MessageEmbed, vararg embeds: MessageEmbed) =
-        this.replyEmbeds(embed, *embeds).setEphemeral(true)
 }

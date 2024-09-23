@@ -8,7 +8,8 @@ import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
-import me.zodd.postmanpat.Utils.EssxUtils.mgr
+import me.zodd.postmanpat.Utils.EssxUtils.manager
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralMessage
 import me.zodd.postmanpat.command.PPSlashCommand
 import me.zodd.postmanpat.command.PostmanCommandProvider
 import net.essentialsx.api.v2.services.mail.MailMessage
@@ -33,10 +34,9 @@ class MailSlashCommands : PostmanCommandProvider {
             }
         }
 
-
         private fun ignoreUserCommand(event: SlashCommandEvent) {
             val user = getEssxUser(event) ?: run {
-                event.reply("Unable to find Minecraft User!").setEphemeral(true).queue()
+                event.replyEphemeralMessage("Unable to find Minecraft User!").queue()
                 return
             }
 
@@ -44,7 +44,7 @@ class MailSlashCommands : PostmanCommandProvider {
             val uuidOpt = event.getOption("uuid")
 
             if (userOpt == null && uuidOpt == null) {
-                event.reply("You may target a user by their @, or by a players UUID!").setEphemeral(true).queue()
+                event.replyEphemeralMessage("You may target a user by their @, or by a players UUID!").queue()
                 return
             }
 
@@ -53,7 +53,7 @@ class MailSlashCommands : PostmanCommandProvider {
             } else {
                 UUID.fromString(uuidOpt?.asString)
             } ?: run {
-                event.reply("UUID malformed").setEphemeral(true).queue()
+                event.replyEphemeralMessage("UUID malformed").queue()
                 return
             }
 
@@ -68,13 +68,11 @@ class MailSlashCommands : PostmanCommandProvider {
             }
 
             if (userList.remove(targetUUID)) {
-                event.reply("You have removed $targetName to your ignore list.")
-                    .setEphemeral(true)
+                event.replyEphemeralMessage("You have removed $targetName to your ignore list.")
                     .queue()
             } else {
                 userList.add(targetUUID)
-                event.reply("You have added $targetName to your ignore list.")
-                    .setEphemeral(true)
+                event.replyEphemeralMessage("You have added $targetName to your ignore list.")
                     .queue()
             }
             plugin.userStorageManager.conf.mailIgnoreList[user.uuid] = userList
@@ -92,7 +90,7 @@ class MailSlashCommands : PostmanCommandProvider {
 
         private fun mailReadCommand(event: SlashCommandEvent) {
             val user = getEssxUser(event.user.id) ?: run {
-                event.reply("Unable to find user, is your account linked?").setEphemeral(true).queue()
+                event.replyEphemeralMessage("Unable to find user, is your account linked?").queue()
                 return
             }
             val mailMessage = user.mailMessages
@@ -101,7 +99,7 @@ class MailSlashCommands : PostmanCommandProvider {
             val includeBool = includeRead != null && includeRead.asBoolean
 
             if (!includeBool && user.unreadMailAmount <= 0) {
-                event.reply("No new mail!").setEphemeral(true).queue()
+                event.replyEphemeralMessage("No new mail!").queue()
                 return
             }
 
@@ -118,21 +116,21 @@ class MailSlashCommands : PostmanCommandProvider {
                 }
             }
 
-            event.reply(content).setEphemeral(true).queue()
+            event.replyEphemeralMessage(content).queue()
         }
 
         private fun mailSendCommand(event: SlashCommandEvent) {
             val user = event.getOption("user")?.asUser ?: run {
-                event.reply("Could not find user!").setEphemeral(true).queue()
+                event.replyEphemeralMessage("Could not find user!").queue()
                 return
             }
             val senderUser = event.user
 
-            val senderUUID = mgr().getUuid(senderUser.id)
-            val uuid = mgr().getUuid(user.id)
+            val senderUUID = manager().getUuid(senderUser.id)
+            val uuid = manager().getUuid(user.id)
 
             if (senderUUID == null || uuid == null) {
-                event.reply("One or more users do not have a linked account!").setEphemeral(true).queue()
+                event.replyEphemeralMessage("One or more users do not have a linked account!").queue()
                 return
             }
 
@@ -143,8 +141,7 @@ class MailSlashCommands : PostmanCommandProvider {
 
             essxUser?.sendMail(senderEssxUser, message)
 
-            event.reply("Sent mail to " + user.asTag)
-                .setEphemeral(true).queue()
+            event.replyEphemeralMessage("Sent mail to " + user.asTag).queue()
         }
 
         /**

@@ -3,7 +3,7 @@ package me.zodd.postmanpat.mail
 import github.scarsz.discordsrv.dependencies.jda.api.entities.PrivateChannel
 import me.zodd.postmanpat.PostmanPat
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
-import me.zodd.postmanpat.Utils.EssxUtils.mgr
+import me.zodd.postmanpat.Utils.EssxUtils.manager
 import net.essentialsx.api.v2.events.UserMailEvent
 import org.bukkit.event.Event
 import org.bukkit.event.Listener
@@ -20,7 +20,7 @@ class MailListeners(private var plugin: PostmanPat) {
 
         val mailManager = DiscordMailManager(listOf(msg))
         val recipient = event.recipient
-        val discordID = mgr().getDiscordId(recipient.uuid)
+        val discordID = manager().getDiscordId(recipient.uuid)
 
         if (discordID == null) {
             plugin.logger.warning("Failed to retrieve discord ID, account may not be linked.")
