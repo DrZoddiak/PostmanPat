@@ -1,4 +1,4 @@
-package me.zodd.postmanpat
+package me.zodd.postmanpat.mail
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.meta.Comment

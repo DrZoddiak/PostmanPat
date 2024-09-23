@@ -8,8 +8,8 @@ import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.Optio
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.OptionData
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData
-import me.zodd.postmanpat.EssxUtils.getEssxUser
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
 import me.zodd.postmanpat.command.PPSlashCommand
 import me.zodd.postmanpat.command.PostmanCommandProvider
 import me.zodd.postmanpat.econ.EconSlashCommands.EconCommands.Companion.pba

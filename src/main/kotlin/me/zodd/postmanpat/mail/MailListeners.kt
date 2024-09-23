@@ -1,8 +1,9 @@
-package me.zodd.postmanpat
+package me.zodd.postmanpat.mail
 
 import github.scarsz.discordsrv.dependencies.jda.api.entities.PrivateChannel
-import me.zodd.postmanpat.EssxUtils.getEssxUser
-import me.zodd.postmanpat.EssxUtils.mgr
+import me.zodd.postmanpat.PostmanPat
+import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
+import me.zodd.postmanpat.Utils.EssxUtils.mgr
 import net.essentialsx.api.v2.events.UserMailEvent
 import org.bukkit.event.Event
 import org.bukkit.event.Listener

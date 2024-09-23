@@ -1,4 +1,4 @@
-package me.zodd.postmanpat
+package me.zodd.postmanpat.mail
 
 import com.earth2me.essentials.User
 import github.scarsz.discordsrv.api.commands.PluginSlashCommand
@@ -6,9 +6,9 @@ import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCom
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionType
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData
-import me.zodd.postmanpat.EssxUtils.getEssxUser
-import me.zodd.postmanpat.EssxUtils.mgr
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
+import me.zodd.postmanpat.Utils.EssxUtils.mgr
 import me.zodd.postmanpat.command.PPSlashCommand
 import me.zodd.postmanpat.command.PostmanCommandProvider
 import net.essentialsx.api.v2.services.mail.MailMessage

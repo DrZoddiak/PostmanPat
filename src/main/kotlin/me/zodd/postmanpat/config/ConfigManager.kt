@@ -37,6 +37,5 @@ class ConfigManager<T : Any>(private val plugin: PostmanPat, fileName: String, c
         }.onFailure {
             plugin.logger.warning("Failed to save configuration file.")
         }
-
     }
 }

@@ -4,9 +4,10 @@ import com.olziedev.playerbusinesses.api.PlayerBusinessesAPI
 import com.olziedev.playerbusinesses.api.business.Business
 import com.olziedev.playerbusinesses.api.business.BusinessPermission
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
+import github.scarsz.discordsrv.dependencies.jda.api.entities.MessageEmbed
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
-import me.zodd.postmanpat.EssxUtils.getEssxUser
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
 import java.awt.Color
 import java.text.DecimalFormat
 
@@ -21,6 +22,14 @@ class PlayerBusinessAddon {
 
     internal val businesses: List<Business> get() = pba.businesses
 
+    fun isAtleastMinimum(amount: Double): Boolean {
+        return amount >= econConfig.minimumSendable
+    }
+
+    fun checkAmountOption(event: SlashCommandEvent): Double? {
+        return event.getOption("amount")?.asDouble?.takeIf { isAtleastMinimum(it) }
+    }
+
     internal fun firmPay(event: SlashCommandEvent) {
         val senderUser = getEssxUser(event) ?: run {
             event.reply("Unable to find User, account may not be linked!")
@@ -28,6 +37,7 @@ class PlayerBusinessAddon {
                 .queue()
             return
         }
+
         val businessName = event.getOption("business")?.asString
 
         val targetUser = getEssxUser(event.getOption("user")?.asUser?.id) ?: run {
@@ -52,8 +62,8 @@ class PlayerBusinessAddon {
             return
         }
 
-        val amount = event.getOption("amount")?.asDouble ?: run {
-            event.reply("Invalid amount")
+        val amount = checkAmountOption(event) ?: run {
+            event.reply("Amount provided was invalid, must be mat least ${econConfig.minimumSendable}")
                 .setEphemeral(true)
                 .queue()
             return
@@ -65,7 +75,7 @@ class PlayerBusinessAddon {
             ?.takeIf { it.transactionSuccess() } ?: run {
             business.balance += amount
 
-            event.reply("Transaction failed!")
+            event.reply("Transaction failed, withdraw reverted.")
                 .setEphemeral(true)
                 .queue()
             return
@@ -78,9 +88,9 @@ class PlayerBusinessAddon {
             setFooter(plugin.configManager.conf.serverBranding)
         }.build()
 
-        event.replyEmbeds(embed)
-            .setEphemeral(true)
-            .queue()
+        event.replyEphemeralEmbed(embed).queue()
     }
 
+    fun SlashCommandEvent.replyEphemeralEmbed(embed: MessageEmbed, vararg embeds: MessageEmbed) =
+        this.replyEmbeds(embed, *embeds).setEphemeral(true)
 }

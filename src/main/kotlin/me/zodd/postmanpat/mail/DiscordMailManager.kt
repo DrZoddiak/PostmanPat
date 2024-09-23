@@ -1,4 +1,4 @@
-package me.zodd.postmanpat
+package me.zodd.postmanpat.mail
 
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import net.essentialsx.api.v2.services.mail.MailMessage

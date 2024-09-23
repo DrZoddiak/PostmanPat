@@ -12,7 +12,10 @@ import me.zodd.postmanpat.config.ConfigManager
 import me.zodd.postmanpat.config.PostmanPatConfig
 import me.zodd.postmanpat.econ.EconSlashCommands
 import me.zodd.postmanpat.econ.EconSlashCommands.EconCommands.*
-import me.zodd.postmanpat.MailSlashCommands.MailCommands.*
+import me.zodd.postmanpat.mail.MailListeners
+import me.zodd.postmanpat.mail.MailSlashCommands
+import me.zodd.postmanpat.mail.MailSlashCommands.MailCommands.*
+import me.zodd.postmanpat.mail.MailUserStorage
 import net.essentialsx.api.v2.events.UserMailEvent
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
