@@ -1,17 +1,21 @@
 package me.zodd.postmanpat.econ
 
+import com.earth2me.essentials.User
 import com.olziedev.playerbusinesses.api.PlayerBusinessesAPI
+import com.olziedev.playerbusinesses.api.business.BStaff
 import com.olziedev.playerbusinesses.api.business.Business
 import com.olziedev.playerbusinesses.api.business.BusinessPermission
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
-import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.PostmanPat
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
-import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralEmbed
+import me.zodd.postmanpat.Utils.MessageUtils.embedMessage
+import me.zodd.postmanpat.Utils.SlashCommandUtils.get
 import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
-import me.zodd.postmanpat.econ.PostmanEconManager.checkAmountOption
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralEmbed
+import me.zodd.postmanpat.econ.entity.BusinessEntity
+import me.zodd.postmanpat.econ.entity.UserEntity
 import java.awt.Color
-import java.text.DecimalFormat
 
 class PlayerBusinessAddon {
 
@@ -19,71 +23,90 @@ class PlayerBusinessAddon {
         PlayerBusinessesAPI.getInstance()
     }
 
-    private val econConfig = plugin.configManager.conf.moduleConfig.econ
-    private val decimalFormat = DecimalFormat(econConfig.decimalFormat)
+    private val econConf = PostmanPat.plugin.configManager.conf.moduleConfig.econ
+    private val decimalFormat = econConf.decimalFormat()
+
+    internal fun listOwnedBusinesses(event: SlashCommandEvent) {
+        val senderUser = getEssxUser(event) ?: run {
+            event.replyEphemeral("Unable to find User, account may not be linked!")
+                .queue()
+            return
+        }
+        val embedBuilder = EmbedBuilder()
+            .setTitle("Owned Businesses")
+            .setColor(Color.blue)
+            .setFooter(PostmanPat.plugin.configManager.conf.serverBranding)
+        pba.getBusinessesByPlayer(senderUser.uuid).map { it.name }.chunked(25).map {
+
+
+        //embedBuilder.addField(it, "", true)
+        }
+
+        event.replyEphemeralEmbed(
+            embedBuilder.build()
+        ).queue()
+    }
+
+    internal fun firmBal(event: SlashCommandEvent) {
+        val senderUser = getEssxUser(event) ?: run {
+            event.replyEphemeral("Unable to find User, account may not be linked!")
+                .queue()
+            return
+        }
+        val businessName = event["business"]?.asString
+        val business: Business = pba.getBusinessByName(businessName?.lowercase()) ?: run {
+            event.replyEphemeral("Business by name [$businessName] was not found!").queue()
+            return
+        }
+        senderUser.hasFirmPermission(event, business) ?: return
+        event.replyEphemeralEmbed(
+            embedMessage(
+                "Balance for ${business.name}",
+                "${econConf.currencySymbol}${decimalFormat.format(business.balance)}"
+            )
+        ).queue()
+    }
+
 
     internal fun firmPay(event: SlashCommandEvent) {
+
         val senderUser = getEssxUser(event) ?: run {
             event.replyEphemeral("Unable to find User, account may not be linked!")
                 .queue()
             return
         }
 
-        val businessName = event.getOption("business")?.asString
+        val businessName = event["business"]?.asString
 
-        val targetUser = getEssxUser(event.getOption("user")?.asUser?.id) ?: run {
+        val targetUser = getEssxUser(event["user"]?.asUser?.id) ?: run {
             event.replyEphemeral("Unable to find User, account may not be linked!")
                 .queue()
             return
         }
 
-        val business: Business? = pba.getBusinessByName(businessName?.lowercase())
-
-        business?.staff?.firstOrNull {
-            val permCheck = it.role.permission
-            val check = permCheck.contains(BusinessPermission.FINANCIAL)
-                    || permCheck.contains(BusinessPermission.PROPRIETOR)
-                    || permCheck.contains(BusinessPermission.ADMINISTRATOR)
-            it.uuid == senderUser.uuid && check
-        } ?: run {
-            event.reply("You do not have permission to transfer funds from this business")
-                .setEphemeral(true)
-                .queue()
+        val business: Business = pba.getBusinessByName(businessName?.lowercase()) ?: run {
+            event.replyEphemeral("Business by name [$businessName] was not found!").queue()
             return
         }
 
-        val amount = checkAmountOption(event) ?: run {
-            event.reply("Amount provided was invalid, must be at least ${econConfig.minimumSendable}")
-                .setEphemeral(true)
-                .queue()
-            return
-        }
+        senderUser.hasFirmPermission(event, business) ?: return
 
-        if (business.balance < amount) {
-            event.replyEphemeral("Your business doesn't have the funds for this transaction")
-                .queue()
-            return
-        }
-
-        business.balance -= amount
-
-        plugin.econ?.depositPlayer(plugin.server.getOfflinePlayer(targetUser.uuid), amount)
-            ?.takeIf { it.transactionSuccess() } ?: run {
-            business.balance += amount
-
-            event.reply("Transaction failed, withdraw reverted.")
-                .setEphemeral(true)
-                .queue()
-            return
-        }
-
-        val embed = EmbedBuilder().apply {
-            setTitle("Payment: $businessName -> ${targetUser.name}")
-            setColor(Color.GREEN)
-            setDescription("You have sent ${econConfig.currencySymbol}${decimalFormat.format(amount)} to ${targetUser.name}")
-            setFooter(plugin.configManager.conf.serverBranding)
-        }.build()
-
-        event.replyEphemeralEmbed(embed).queue()
+        val sender = BusinessEntity(business)
+        val receiver = UserEntity(targetUser)
+        PostmanEconManager(sender, event).transferFunds(receiver)
     }
+
+    private fun User.hasFirmPermission(event: SlashCommandEvent, business: Business): BStaff? {
+        return business.staff?.firstOrNull {
+            val permCheck = it.role.permission
+            it.uuid == uuid && (permCheck.contains(BusinessPermission.FINANCIAL)
+                    || permCheck.contains(BusinessPermission.PROPRIETOR)
+                    || permCheck.contains(BusinessPermission.ADMINISTRATOR))
+        } ?: run {
+            event.replyEphemeral("You do not have permission to transfer funds from this business")
+                .queue()
+            null
+        }
+    }
+
 }

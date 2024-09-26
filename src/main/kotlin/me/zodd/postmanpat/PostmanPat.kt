@@ -32,11 +32,10 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
     val configManager by lazy { ConfigManager(plugin, "postmanpatConfig", PostmanPatConfig::class) }
     val userStorageManager by lazy { ConfigManager(plugin, "userStorage", MailUserStorage::class) }
 
-    val econ: Economy? by lazy {
+    val econ: Economy by lazy {
         loadEcon() ?: run {
             server.pluginManager.disablePlugin(this)
-            logger.warning("Failed to load economy! This plugin requires Vault!")
-            null
+            throw Error("Failed to load economy! This plugin requires Vault!")
         }
     }
 
@@ -81,6 +80,8 @@ class PostmanPat : JavaPlugin(), SlashCommandProvider {
 
             ECON_FIRM_BASE.command -> when (event.subcommandName) {
                 ECON_FIRM_PAY.command -> ECON_FIRM_PAY
+                ECON_FIRM_LIST.command -> ECON_FIRM_LIST
+                ECON_FIRM_BALANCE.command -> ECON_FIRM_BALANCE
                 else -> null
             }
 

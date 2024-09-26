@@ -1,21 +1,20 @@
 package me.zodd.postmanpat.econ
 
 import github.scarsz.discordsrv.api.commands.PluginSlashCommand
-import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
-import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.Command
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionType
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData
-import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.OptionData
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
+import me.zodd.postmanpat.Utils.MessageUtils.embedMessage
 import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralEmbed
+import me.zodd.postmanpat.Utils.SlashCommandUtils.get
 import me.zodd.postmanpat.command.PPSlashCommand
 import me.zodd.postmanpat.command.PostmanCommandProvider
 import me.zodd.postmanpat.econ.EconSlashCommands.EconCommands.Companion.pba
-import java.awt.Color
-import java.text.DecimalFormat
+import me.zodd.postmanpat.econ.entity.UserEntity
 
 
 class EconSlashCommands : PostmanCommandProvider {
@@ -24,7 +23,9 @@ class EconSlashCommands : PostmanCommandProvider {
         ECON_PAY(plugin.configManager.conf.moduleConfig.econ.payCommand),
         ECON_BALANCE(plugin.configManager.conf.moduleConfig.econ.balCommand),
         ECON_FIRM_BASE(plugin.configManager.conf.moduleConfig.econ.firmBaseCommand),
-        ECON_FIRM_PAY(plugin.configManager.conf.moduleConfig.econ.firmPayCommand)
+        ECON_FIRM_PAY(plugin.configManager.conf.moduleConfig.econ.firmPayCommand),
+        ECON_FIRM_LIST(plugin.configManager.conf.moduleConfig.econ.firmListBusinesses),
+        ECON_FIRM_BALANCE(plugin.configManager.conf.moduleConfig.econ.firmBalCommand),
         ;
 
         companion object {
@@ -40,102 +41,54 @@ class EconSlashCommands : PostmanCommandProvider {
                 ECON_PAY -> this::payUserCommand
                 ECON_BALANCE -> this::balanceUserCommand
                 ECON_FIRM_BASE -> { _ -> /*This command is never run*/ }
-                ECON_FIRM_PAY -> { s ->
-                    pba?.firmPay(s) ?: run {
-                        s.replyEphemeral("Error Not loaded").queue()
-                    }
+                ECON_FIRM_PAY -> { s -> // Reply should never send in theory, as the command shouldn't be loaded
+                    pba?.firmPay(s) ?: s.replyEphemeral("Error Not loaded").queue()
+                }
+
+                ECON_FIRM_LIST -> { s ->
+                    pba?.listOwnedBusinesses(s) ?: s.replyEphemeral("Error Not loaded").queue()
+                }
+
+                ECON_FIRM_BALANCE -> { s ->
+                    pba?.firmBal(s) ?: s.replyEphemeral("Error Not loaded").queue()
                 }
             }
         }
 
         private val config = plugin.configManager.conf
         private val econConfig = config.moduleConfig.econ
-        private val decimalFormat = DecimalFormat(econConfig.decimalFormat)
-
-        private val econ by lazy {
-            plugin.econ ?: run {
-                plugin.logger.warning("Econ not loaded, aborting!")
-                null
-            }
-        }
+        private val decimalFormat = econConfig.decimalFormat()
 
         private fun payUserCommand(event: SlashCommandEvent) {
             val senderUser = getEssxUser(event) ?: run {
                 event.replyEphemeral("Unable to find User, account may not be linked!").queue()
                 return
             }
-            val offlineSender = plugin.server.getOfflinePlayer(senderUser.uuid)
-            val econ = plugin.econ ?: return
-            val senderBal = econ.getBalance(offlineSender)
 
-            val target = event.getOption("user")?.asUser ?: return
-            val targetUser = getEssxUser(target.id) ?: run {
+            val target = event.getOption("user")?.asUser?.id ?: return
+            val targetUser = getEssxUser(target) ?: run {
                 event.replyEphemeral("Unable to find User, account may not be linked!").queue()
                 return
             }
 
-            if (!targetUser.isAcceptingPay) {
-                event.replyEphemeral("Target is not accepting pay at this time!").queue()
-            }
-
-            val amount = PostmanEconManager.checkAmountOption(event) ?: run {
-                event.replyEphemeral("Amount must be more than ${econConfig.minimumSendable}!").queue()
-                return
-            }
-
-            if (senderBal < amount) {
-                event.replyEphemeral("You are too poor for this transaction!").queue()
-                return
-            }
-
-            val offlineTarget = plugin.server.getOfflinePlayer(targetUser.uuid)
-
-            // Attempt to withdraw money from sender
-            val withdrawResult = econ.withdrawPlayer(offlineSender, amount)
-            if (!withdrawResult.transactionSuccess()) {
-                event.replyEphemeral("Failed to withdraw money from ${senderUser.name}, transaction cancelled.")
-                    .queue()
-                return
-            }
-            // Attempt to deposit amount, or revert if failed.
-            val depositResult = econ.depositPlayer(offlineTarget, amount)
-            if (!depositResult.transactionSuccess()) {
-                val revertResult = econ.depositPlayer(offlineSender, amount)
-                if (!revertResult.transactionSuccess()) {
-                    plugin.logger.warning("Failed to revert transaction. ${senderUser.name} may be owed $amount")
-                    event.replyEphemeral("Failed to revert transaction. Please contact an administrator.")
-                        .queue()
-                    return
-                }
-                event.replyEphemeral("Failed to deposit money to ${targetUser.name}, transaction reverted.")
-                    .queue()
-                return
-            }
-
-            val embed = EmbedBuilder().apply {
-                setTitle("Payment")
-                setColor(Color.green)
-                setDescription("You have sent ${econConfig.currencySymbol}${decimalFormat.format(amount)} to ${targetUser.name}")
-                setFooter(config.serverBranding)
-            }.build()
-
-            event.replyEmbeds(embed).queue()
+            val sender = UserEntity(senderUser)
+            val receiver = UserEntity(targetUser)
+            PostmanEconManager(sender, event).transferFunds(receiver)
         }
 
         private fun balanceUserCommand(event: SlashCommandEvent) {
             val senderUser = getEssxUser(event) ?: return
-            val target = event.getOption("user")
-            val targetUser = target?.let { getEssxUser(it.asUser.id) } ?: senderUser
-            val balance = econ?.getBalance(plugin.server.getOfflinePlayer(targetUser.uuid)) ?: return
+            val user = event["user"]
+            val targetUser = user?.let { getEssxUser(it.asUser.id) } ?: senderUser
 
-            val embed = EmbedBuilder().apply {
-                setTitle("Balance for ${targetUser.name}")
-                setColor(Color.green)
-                setDescription("They currently have ${econConfig.currencySymbol}${decimalFormat.format(balance)} available in their in-game balance")
-                setFooter(config.serverBranding)
-            }.build()
+            val target = UserEntity(targetUser)
 
-            event.replyEmbeds(embed).queue()
+            event.replyEphemeralEmbed(
+                embedMessage(
+                    "Balance for ${target.name}",
+                    "They currently have ${econConfig.currencySymbol}${decimalFormat.format(target.balance)} available in business balance"
+                )
+            ).queue()
         }
     }
 
@@ -160,8 +113,17 @@ class EconSlashCommands : PostmanCommandProvider {
                             SubcommandData(EconCommands.ECON_FIRM_PAY.command, "Command to pay from your business")
                                 .addOption(OptionType.STRING, "business", "business to pay from", true)
                                 .addOption(OptionType.USER, "user", "user to pay", true)
-                                .addOption(OptionType.NUMBER, "amount", "amount to pay another user", true)
+                                .addOption(OptionType.NUMBER, "amount", "amount to pay another user", true),
+                            SubcommandData(
+                                EconCommands.ECON_FIRM_BALANCE.command,
+                                "Command to check your businesses balance"
+                            ).addOption(OptionType.STRING, "business", "business to check balance of", true),
+                            SubcommandData(
+                                EconCommands.ECON_FIRM_LIST.command,
+                                "Lists businesses you have financial access to"
+                            )
                         )
+
                 )
             )
         }

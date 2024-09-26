@@ -1,10 +1,13 @@
 package me.zodd.postmanpat
 
 import com.earth2me.essentials.User
+import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder
 import github.scarsz.discordsrv.dependencies.jda.api.entities.MessageEmbed
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
+import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionMapping
 import github.scarsz.discordsrv.objects.managers.AccountLinkManager
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import java.awt.Color
 import java.util.*
 
 object Utils {
@@ -56,6 +59,24 @@ object Utils {
          * @return An ephemerally configured message, not yet queued.
          */
         fun SlashCommandEvent.replyEphemeral(message: String) = reply(message).setEphemeral(true)
+
+        private val embedBase = EmbedBuilder()
+            .setColor(Color.green)
+            .setFooter(plugin.configManager.conf.serverBranding)
+
+        fun embedMessage(title: String, description: String): MessageEmbed {
+            return embedBase
+                .setTitle(title)
+                .setDescription(description)
+                .build()
+        }
     }
+    object SlashCommandUtils {
+        operator fun SlashCommandEvent.get(option : String): OptionMapping? {
+            return getOption(option)
+        }
+    }
+
+
 
 }
