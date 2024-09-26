@@ -36,10 +36,8 @@ class PlayerBusinessAddon {
             .setTitle("Owned Businesses")
             .setColor(Color.blue)
             .setFooter(PostmanPat.plugin.configManager.conf.serverBranding)
-        pba.getBusinessesByPlayer(senderUser.uuid).map { it.name }.chunked(25).map {
-
-
-        //embedBuilder.addField(it, "", true)
+        pba.getBusinessesByPlayer(senderUser.uuid).map { it.name }.map {
+            embedBuilder.addField(it, "", true)
         }
 
         event.replyEphemeralEmbed(
