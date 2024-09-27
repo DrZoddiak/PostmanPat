@@ -2,9 +2,12 @@ package me.zodd.postmanpat.econ
 
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
 import me.zodd.postmanpat.Utils.MessageUtils.embedMessage
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
 import me.zodd.postmanpat.econ.entity.EconEntity
 import me.zodd.postmanpat.econ.entity.PPEconomyTransactionResult
+import me.zodd.postmanpat.econ.entity.UserEntity
 
 class PostmanEconManager(private val sender: EconEntity, private val event: SlashCommandEvent) {
 
@@ -12,30 +15,42 @@ class PostmanEconManager(private val sender: EconEntity, private val event: Slas
     private val decimalFormat = econConf.decimalFormat()
 
     fun transferFunds(recipient: EconEntity) {
+        val commandSender = getEssxUser(event)?: run {
+            event.replyEphemeral("Unable to find user, please ensure your account is linked!").queue()
+            return
+        }
+
         takeUnless { sender.uuid == recipient.uuid } ?: run {
             PPEconomyTransactionResult.SENT_TO_SELF.emitError(event)
             return
         }
 
-        takeIf { sender.acceptingPayment.emitError(event).isSuccess() } ?: return
+        takeIf { recipient.acceptingPayment.emitError(event).isSuccess() } ?: return
 
         val amount = checkAmountOption() ?: run {
             PPEconomyTransactionResult.UNDER_MINIMUM.emitError(event)
             return
         }
 
+
         takeIf { sender.hasEnough(amount).emitError(event).isSuccess() } ?: return
 
-        takeIf { sender.withdraw(amount).emitError(event, sender.name).isSuccess() } ?: return
-
-        takeIf { recipient.deposit(amount).emitError(event, recipient.name).isSuccess() } ?: run {
-            //Revert on fail
-            takeIf { sender.deposit(amount).isSuccess() } ?: run {
-                plugin.logger.warning("Failed to revert transaction. ${sender.name} may be owed $amount")
-                PPEconomyTransactionResult.PLUGIN_REVERT_FAIL.emitError(event)
+        when (val payment = sender.pay(UserEntity(commandSender), recipient, amount)) {
+            PPEconomyTransactionResult.PLUGIN_WITHDRAW -> {
+                payment.emitError(event, sender.name)
                 return
             }
-            return
+
+            PPEconomyTransactionResult.PLUGIN_DEPOSIT -> {
+                payment.emitError(event, sender.name)
+                takeIf { sender.deposit(amount).isSuccess() } ?: run {
+                    plugin.logger.warning("Failed to revert transaction. ${sender.name} may be owed $amount")
+                    PPEconomyTransactionResult.PLUGIN_REVERT_FAIL.emitError(event)
+                }
+                return
+            }
+
+            else -> {}
         }
 
         event.replyEmbeds(

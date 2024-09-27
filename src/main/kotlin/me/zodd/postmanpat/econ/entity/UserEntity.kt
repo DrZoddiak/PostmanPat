@@ -33,6 +33,12 @@ class UserEntity(user: User) : EconEntity {
             ?: return PPEconomyTransactionResult.PLUGIN_WITHDRAW
         return PPEconomyTransactionResult.SUCCESS
     }
+
+    override fun pay(sender: UserEntity, econEntity: EconEntity, amount: Double): PPEconomyTransactionResult {
+        val res = econEntity.withdraw(amount)
+        takeIf { res.isSuccess() } ?: return res // Return error
+        return deposit(amount)
+    }
 }
 
 enum class PPEconomyTransactionResult(private val msg: String) {
@@ -52,7 +58,7 @@ enum class PPEconomyTransactionResult(private val msg: String) {
 
     fun emitError(event: SlashCommandEvent, arg: String? = null): PPEconomyTransactionResult {
         if (!isSuccess())
-            event.replyEphemeral(msg.replace("{}","$arg")).queue()
+            event.replyEphemeral(msg.replace("{}", "$arg")).queue()
         return this
     }
 }

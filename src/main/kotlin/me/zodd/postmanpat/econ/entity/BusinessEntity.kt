@@ -1,6 +1,7 @@
 package me.zodd.postmanpat.econ.entity
 
 import com.olziedev.playerbusinesses.api.business.Business
+import java.time.Instant
 import java.util.UUID
 
 class BusinessEntity(private val business: Business) : EconEntity {
@@ -18,6 +19,12 @@ class BusinessEntity(private val business: Business) : EconEntity {
         // I have no way of knowing if this worked or not, so it always does!
         business.balance += amount
         return PPEconomyTransactionResult.SUCCESS
+    }
+
+    override fun pay(sender: UserEntity, econEntity: EconEntity, amount: Double): PPEconomyTransactionResult {
+        econEntity.withdraw(amount)
+        business.transactions.addPaidEntry(sender.uuid, econEntity.uuid, amount, Instant.now().toEpochMilli())
+        return deposit(amount)
     }
 
     override fun withdraw(amount: Double): PPEconomyTransactionResult {
