@@ -6,7 +6,6 @@ import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
 import me.zodd.postmanpat.Utils.MessageUtils.embedMessage
 import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
 import me.zodd.postmanpat.econ.entity.EconEntity
-import me.zodd.postmanpat.econ.entity.PPEconomyTransactionResult
 import me.zodd.postmanpat.econ.entity.UserEntity
 
 class PostmanEconManager(private val sender: EconEntity, private val event: SlashCommandEvent) {

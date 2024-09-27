@@ -1,6 +1,7 @@
 package me.zodd.postmanpat.econ.entity
 
 import com.olziedev.playerbusinesses.api.business.Business
+import me.zodd.postmanpat.econ.PPEconomyTransactionResult
 import java.time.Instant
 import java.util.UUID
 

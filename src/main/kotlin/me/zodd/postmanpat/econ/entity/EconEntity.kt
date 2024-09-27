@@ -1,5 +1,6 @@
 package me.zodd.postmanpat.econ.entity
 
+import me.zodd.postmanpat.econ.PPEconomyTransactionResult
 import java.util.UUID
 
 /**
