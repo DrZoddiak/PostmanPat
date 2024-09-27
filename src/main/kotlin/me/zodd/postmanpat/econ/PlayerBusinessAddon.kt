@@ -101,7 +101,7 @@ class PlayerBusinessAddon {
                     || permCheck.contains(BusinessPermission.PROPRIETOR)
                     || permCheck.contains(BusinessPermission.ADMINISTRATOR))
         } ?: run {
-            event.replyEphemeral("You do not have permission to transfer funds from this business")
+            event.replyEphemeral("You do not have permission to view or transfer funds from this business")
                 .queue()
             null
         }
