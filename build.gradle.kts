@@ -15,14 +15,14 @@ repositories {
     maven (url = "https://nexus.scarsz.me/content/repositories/public/")
     // VaultAPI
     maven (url = "https://jitpack.io")
-
+    // DemocracyBusiness
     maven(url = "https://repo.olziedev.com/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     compileOnly("com.discordsrv:discordsrv:1.28.1")
-    compileOnly("net.dv8tion:JDA:5.0.2")
+    compileOnly("net.dv8tion:JDA:4.4.0_352.fix-2")
     compileOnly("net.essentialsx:EssentialsX:2.20.1")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("org.spongepowered:configurate-hocon:4.1.2")
