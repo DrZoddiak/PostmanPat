@@ -2,9 +2,12 @@ package me.zodd.postmanpat.econ
 
 import github.scarsz.discordsrv.api.commands.PluginSlashCommand
 import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCommandEvent
+import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.Command
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionType
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.CommandData
+import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.OptionData
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.build.SubcommandData
+import me.zodd.postmanpat.PostmanPat
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
 import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
 import me.zodd.postmanpat.Utils.MessageUtils.embedMessage
@@ -65,11 +68,19 @@ class EconSlashCommands : PostmanCommandProvider {
                 return
             }
 
-            val target = event.getOption("user")?.asUser?.id ?: return
-            val targetUser = getEssxUser(target) ?: run {
-                event.replyEphemeral("Unable to find User, account may not be linked!").queue()
-                return
-            }
+            val targetUser = event["user"]?.asUser?.id?.let { getEssxUser(it) }
+                ?: event["player"]?.asString?.let { plugin.server.getOfflinePlayer(it) }
+                    ?.let { getEssxUser(it.uniqueId) } ?: run {
+                    event.replyEphemeral("Unable to find user! Ensure name is spelled correctly or try @tagging them")
+                        .queue()
+                    return
+                }
+
+            /*            val target = event.getOption("user")?.asUser?.id ?: return
+                        val targetUser = getEssxUser(target) ?: run {
+                            event.replyEphemeral("Unable to find User, account may not be linked!").queue()
+                            return
+                        }*/
 
             val sender = UserEntity(senderUser)
             val receiver = UserEntity(targetUser)
@@ -96,12 +107,14 @@ class EconSlashCommands : PostmanCommandProvider {
         val commands = mutableListOf(
             PluginSlashCommand(
                 plugin, CommandData(EconCommands.ECON_PAY.command, "Pay's the target user a specified amount")
-                    .addOption(OptionType.USER, "user", "user to send money to", true)
                     .addOption(OptionType.NUMBER, "amount", "amount to pay user", true)
+                    .addOption(OptionType.USER, "user", "user to pay by @tag", false)
+                    .addOption(OptionType.STRING, "player", "player to pay by username", false)
             ),
             PluginSlashCommand(
                 plugin, CommandData(EconCommands.ECON_BALANCE.command, "Checks the balance of the target or sender")
-                    .addOption(OptionType.USER, "user", "User to check balance of", false)
+                    .addOption(OptionType.USER, "user", "user to pay", false)
+                    .addOption(OptionType.STRING, "player", "player to pay", false)
             )
         )
         // Add command if PlayerBusinesses is enabled
@@ -112,8 +125,9 @@ class EconSlashCommands : PostmanCommandProvider {
                         .addSubcommands(
                             SubcommandData(EconCommands.ECON_FIRM_PAY.command, "Command to pay from your business")
                                 .addOption(OptionType.STRING, "business", "business to pay from", true)
-                                .addOption(OptionType.USER, "user", "user to pay", true)
-                                .addOption(OptionType.NUMBER, "amount", "amount to pay another user", true),
+                                .addOption(OptionType.NUMBER, "amount", "amount to pay another user", true)
+                                .addOption(OptionType.USER, "user", "user to pay by @tag", false)
+                                .addOption(OptionType.STRING, "player", "player to pay by username", false),
                             SubcommandData(
                                 EconCommands.ECON_FIRM_BALANCE.command,
                                 "Command to check your businesses balance"

@@ -76,11 +76,19 @@ class PlayerBusinessAddon {
 
         val businessName = event["business"]?.asString
 
-        val targetUser = getEssxUser(event["user"]?.asUser?.id) ?: run {
+        val targetUser = event["user"]?.asUser?.id?.let { getEssxUser(it) }
+            ?: event["player"]?.asString?.let { PostmanPat.plugin.server.getOfflinePlayer(it) }
+                ?.let { getEssxUser(it.uniqueId) } ?: run {
+                event.replyEphemeral("Unable to find user! Ensure name is spelled correctly or try @tagging them")
+                    .queue()
+                return
+            }
+
+/*        val targetUser = getEssxUser(event["user"]?.asUser?.id) ?: run {
             event.replyEphemeral("Unable to find User, account may not be linked!")
                 .queue()
             return
-        }
+        }*/
 
         val business: Business = pba.getBusinessByName(businessName?.lowercase()) ?: run {
             event.replyEphemeral("Business by name [$businessName] was not found!").queue()
