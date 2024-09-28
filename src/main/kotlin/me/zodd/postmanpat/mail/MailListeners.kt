@@ -15,6 +15,7 @@ class MailListeners(private var plugin: PostmanPat) {
         val event = e as UserMailEvent
 
         val msg = event.message
+        msg.senderUsername
         val senderUUID = msg.senderUUID
         val senderUser = getEssxUser(senderUUID)
 
@@ -34,9 +35,8 @@ class MailListeners(private var plugin: PostmanPat) {
 
         val ignores = plugin.userStorageManager.conf.mailIgnoreList.getOrDefault(recipient.uuid, ArrayList())
 
-        if (getEssxUser(user.id)?.isIgnoredPlayer(senderUser) == true || (ignores.isNotEmpty() && ignores.contains(
-                senderUUID
-            ))
+        if (senderUser != null && (getEssxUser(user.id)?.isIgnoredPlayer(senderUser) == true)
+            || (ignores.isNotEmpty() && ignores.contains(senderUUID))
         ) {
             // Don't send a message if ignoring player
             // They will still receive the mail, just not through discord

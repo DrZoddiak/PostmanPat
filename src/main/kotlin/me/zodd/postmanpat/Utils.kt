@@ -7,6 +7,8 @@ import github.scarsz.discordsrv.dependencies.jda.api.events.interaction.SlashCom
 import github.scarsz.discordsrv.dependencies.jda.api.interactions.commands.OptionMapping
 import github.scarsz.discordsrv.objects.managers.AccountLinkManager
 import me.zodd.postmanpat.PostmanPat.Companion.plugin
+import me.zodd.postmanpat.Utils.EssxUtils.getEssxUser
+import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
 import java.awt.Color
 import java.util.*
 
@@ -71,12 +73,24 @@ object Utils {
                 .build()
         }
     }
+
     object SlashCommandUtils {
-        operator fun SlashCommandEvent.get(option : String): OptionMapping? {
+        operator fun SlashCommandEvent.get(option: String): OptionMapping? {
             return getOption(option)
         }
-    }
 
+        fun SlashCommandEvent.userOrPlayer(userArg: String = "user", playerArg: String = "player"): User? {
+            return this[userArg]?.asUser?.id?.let { getEssxUser(it) }
+                ?: this[playerArg]?.asString?.let { plugin.server.getOfflinePlayer(it) }
+                    ?.let { getEssxUser(it.uniqueId) }
+                ?: run {
+                    replyEphemeral("Unable to find user! Ensure name is spelled correctly or try @tagging them")
+                        .queue()
+                    return null
+                }
+        }
+
+    }
 
 
 }

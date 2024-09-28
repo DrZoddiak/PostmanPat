@@ -14,6 +14,7 @@ import me.zodd.postmanpat.Utils.MessageUtils.embedMessage
 import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeral
 import me.zodd.postmanpat.Utils.MessageUtils.replyEphemeralEmbed
 import me.zodd.postmanpat.Utils.SlashCommandUtils.get
+import me.zodd.postmanpat.Utils.SlashCommandUtils.userOrPlayer
 import me.zodd.postmanpat.command.PPSlashCommand
 import me.zodd.postmanpat.command.PostmanCommandProvider
 import me.zodd.postmanpat.econ.EconSlashCommands.EconCommands.Companion.pba
@@ -68,19 +69,7 @@ class EconSlashCommands : PostmanCommandProvider {
                 return
             }
 
-            val targetUser = event["user"]?.asUser?.id?.let { getEssxUser(it) }
-                ?: event["player"]?.asString?.let { plugin.server.getOfflinePlayer(it) }
-                    ?.let { getEssxUser(it.uniqueId) } ?: run {
-                    event.replyEphemeral("Unable to find user! Ensure name is spelled correctly or try @tagging them")
-                        .queue()
-                    return
-                }
-
-            /*            val target = event.getOption("user")?.asUser?.id ?: return
-                        val targetUser = getEssxUser(target) ?: run {
-                            event.replyEphemeral("Unable to find User, account may not be linked!").queue()
-                            return
-                        }*/
+            val targetUser = event.userOrPlayer() ?: return
 
             val sender = UserEntity(senderUser)
             val receiver = UserEntity(targetUser)
@@ -113,8 +102,8 @@ class EconSlashCommands : PostmanCommandProvider {
             ),
             PluginSlashCommand(
                 plugin, CommandData(EconCommands.ECON_BALANCE.command, "Checks the balance of the target or sender")
-                    .addOption(OptionType.USER, "user", "user to pay", false)
-                    .addOption(OptionType.STRING, "player", "player to pay", false)
+                    .addOption(OptionType.USER, "user", "user to check balance of", false)
+                    .addOption(OptionType.STRING, "player", "player to check balance of", false)
             )
         )
         // Add command if PlayerBusinesses is enabled
